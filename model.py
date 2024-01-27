@@ -1,14 +1,15 @@
-import os
-import shutil
-import time
 import glob
+import os
+import random
+import shutil
+import string
+import time
+
+import cv2
+import numpy as np
 import torch
 from PIL import Image
-import cv2
-import random
-import string
-import numpy as np
-import random
+
 
 def get_random_string(length):
     """

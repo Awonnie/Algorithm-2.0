@@ -1,9 +1,11 @@
 import time
-from algo.algo import MazeSolver 
-from flask import Flask, request, jsonify
+
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from model import *
+
+from algo.algo import MazeSolver
 from helper import command_generator
+from model import *
 
 app = Flask(__name__)
 CORS(app)
@@ -90,12 +92,12 @@ def image_predict():
     obstacle_id = constituents[1]
 
     ## Week 8 ## 
-    #signal = constituents[2].strip(".jpg")
-    #image_id = predict_image(filename, model, signal)
+    signal = constituents[2].strip(".jpg")
+    image_id = predict_image(filename, model, signal)
 
     ## Week 9 ## 
     # We don't need to pass in the signal anymore
-    image_id = predict_image_week_9(filename,model)
+    #image_id = predict_image_week_9(filename,model)
 
     # Return the obstacle_id and image_id
     result = {
@@ -116,4 +118,4 @@ def stitch():
     return jsonify({"result": "ok"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
