@@ -12,6 +12,7 @@ app = Flask(__name__)
 CORS(app)
 #model = load_model()
 model = None
+
 @app.route('/status', methods=['GET'])
 def status():
     """
@@ -82,7 +83,11 @@ def path_finding():
             path_results[i].get('x'), path_results[i].get('y'),
             path_results[i+1].get('x'), path_results[i+1].get('y')
             ) / MOTOR_SPEED)
-        print(f"Path Time: {path_time}")
+        
+
+    path_time.insert(0,0)
+    print(f"Path Time: {path_time}")
+    print(f"Commands: {commands}")
     
     return jsonify({
         "data": {
