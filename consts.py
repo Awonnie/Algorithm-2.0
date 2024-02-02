@@ -35,3 +35,5 @@ TURN_RADIUS = 1
 
 SAFE_COST = 1000 # the cost for the turn in case there is a chance that the robot is touch some obstacle
 SCREENSHOT_COST = 50 # the cost for the place where the picture is taken
+
+MOTOR_SPEED =  2 # measured as cells/seconds, in other words, it can reach X amount of cells(10cm units) within 1 second

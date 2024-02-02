@@ -6,11 +6,13 @@ from flask_cors import CORS
 from algo.algo import MazeSolver
 from helper import command_generator
 from model import *
+from consts import MOTOR_SPEED
 
 app = Flask(__name__)
 CORS(app)
 #model = load_model()
 model = None
+
 @app.route('/status', methods=['GET'])
 def status():
     """
@@ -54,6 +56,10 @@ def path_finding():
 
     # Get the starting location and add it to path_results
     path_results = [optimal_path[0].get_dict()]
+    
+    # Used to store the estimated duration in seconds for running each command
+    path_time = []
+
     # Process each command individually and append the location the robot should be after executing that command to path_results
     i = 0
     for command in commands:
@@ -68,11 +74,27 @@ def path_finding():
         else:
             i += 1
         path_results.append(optimal_path[i].get_dict())
+
+    for i in range(len(path_results)):
+        if (i+1) == len(path_results): 
+            break
+
+        path_time.append(MazeSolver.compute_coord_distance(
+            path_results[i].get('x'), path_results[i].get('y'),
+            path_results[i+1].get('x'), path_results[i+1].get('y')
+            ) / MOTOR_SPEED)
+        
+
+    path_time.insert(0,0)
+    print(f"Path Time: {path_time}")
+    print(f"Commands: {commands}")
+    
     return jsonify({
         "data": {
             'distance': distance,
             'path': path_results,
-            'commands': commands
+            'commands': commands,
+            'path_time': path_time
         },
         "error": None
     })

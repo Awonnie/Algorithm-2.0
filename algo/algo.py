@@ -189,7 +189,7 @@ class MazeSolver:
             if optimal_path:
                 # if found optimal path, return
                 break
-
+            
         return optimal_path, distance
 
     @staticmethod
@@ -394,9 +394,11 @@ class MazeSolver:
                 # Pop the node with the smallest distance
                 _, cur_x, cur_y, cur_direction = heapq.heappop(heap)
                 
+                # Skip if the node has already been explored
                 if (cur_x, cur_y, cur_direction) in visited:
                     continue
 
+                # Goal testing, checking if popped node is the goal node
                 if end.is_eq(cur_x, cur_y, cur_direction):
                     record_path(start, end, parent, g_distance[(cur_x, cur_y, cur_direction)])
                     return
