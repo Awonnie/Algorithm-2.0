@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 from algo.algo import MazeSolver
 from consts import MOTOR_SPEED
-from helper import command_generator
+from helper import command_generator, coordinate_cal
 from model import *
 
 app = Flask(__name__)
@@ -60,6 +60,11 @@ def path_finding():
     # Used to store the estimated duration in seconds for running each command
     path_time = []
 
+    # Process each command individually and append the location the robot should be after executing that command to path_results
+    i = 0
+    for command in commands:
+        path_results, i = coordinate_cal(path_results, command, i)
+
     # Initialize total duration variable
     total_duration = 0
 
@@ -91,7 +96,6 @@ def path_finding():
             i += 1
             command_duration = 2
 
-        path_results.append(optimal_path[i].get_dict())
         total_duration += command_duration
 
     for i in range(len(path_results)):
@@ -106,6 +110,7 @@ def path_finding():
 
     path_time.insert(0,0)
     print(f"Path Time: {path_time}")
+    print(f"Path: {path_results}")
     print(f"Commands: {commands}")
     print(f"Duration:{total_duration}")
     
