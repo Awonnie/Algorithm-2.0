@@ -5,7 +5,11 @@ from flask_cors import CORS
 
 from algo.algo import MazeSolver
 from consts import MOTOR_SPEED
+<<<<<<< Updated upstream
 from helper import command_generator, coordinate_cal
+=======
+from helper import command_generator
+>>>>>>> Stashed changes
 from model import *
 
 app = Flask(__name__)
@@ -60,8 +64,12 @@ def path_finding():
     # Used to store the estimated duration in seconds for running each command
     path_time = []
 
+    # Initialize total duration variable
+    total_duration = 0
+
     # Process each command individually and append the location the robot should be after executing that command to path_results
     i = 0
+    command_duration = 0
     for command in commands:
         path_results, i = coordinate_cal(path_results, command, i)
 
@@ -74,17 +82,26 @@ def path_finding():
         command_duration = 0
         movement = 0
         if command.startswith("SNAP"):
+<<<<<<< Updated upstream
             movement = 0
             command_duration = distance
+=======
+            command_duration = 2
+>>>>>>> Stashed changes
             continue
 
         if command.startswith("FIN"):
+<<<<<<< Updated upstream
             movement = 0
             command_duration = distance
+=======
+            command_duration = 0
+>>>>>>> Stashed changes
             continue
 
         elif command.startswith("FW") or command.startswith("FS"):
             i += int(command[2:]) // 10
+<<<<<<< Updated upstream
             movement = int(command[2:])/10
             command_duration = movement / MOTOR_SPEED
 
@@ -96,23 +113,44 @@ def path_finding():
             i += 1
             command_duration = 2
 
+=======
+            distance = int(command[2:])
+            command_duration = (distance/10) / MOTOR_SPEED
+        elif command.startswith("BW") or command.startswith("BS"):
+            i += int(command[2:]) // 10
+            distance = int(command[2:])
+            command_duration = (distance/10) / MOTOR_SPEED
+        else:
+            i += 1
+            command_duration = 2 #for turn commands, assume that 2s
+        path_results.append(optimal_path[i].get_dict())
+>>>>>>> Stashed changes
         total_duration += command_duration
 
     for i in range(len(path_results)):
         if (i+1) == len(path_results): 
             break
 
+        if (path_results[i].get('s')==1):
+            path_time.append(2.0)
+
         path_time.append(MazeSolver.compute_coord_distance(
             path_results[i].get('x'), path_results[i].get('y'),
             path_results[i+1].get('x'), path_results[i+1].get('y')
             ) / MOTOR_SPEED)
         
+        
 
     path_time.insert(0,0)
+    print(f"Path: {path_results}")
     print(f"Path Time: {path_time}")
     print(f"Path: {path_results}")
     print(f"Commands: {commands}")
+<<<<<<< Updated upstream
     print(f"Duration:{total_duration}")
+=======
+    print(f"Time: {total_duration}")
+>>>>>>> Stashed changes
     
     return jsonify({
         "data": {
@@ -120,7 +158,11 @@ def path_finding():
             'path': path_results,
             'commands': commands,
             'path_time': path_time,
+<<<<<<< Updated upstream
             'duration': total_duration 
+=======
+            'duration': total_duration
+>>>>>>> Stashed changes
         },
         "error": None
     })
