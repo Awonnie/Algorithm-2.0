@@ -4,9 +4,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from algo.algo import MazeSolver
+from consts import MOTOR_SPEED
 from helper import command_generator
 from model import *
-from consts import MOTOR_SPEED
 
 app = Flask(__name__)
 CORS(app)
@@ -60,20 +60,39 @@ def path_finding():
     # Used to store the estimated duration in seconds for running each command
     path_time = []
 
+    # Initialize total duration variable
+    total_duration = 0
+
     # Process each command individually and append the location the robot should be after executing that command to path_results
     i = 0
     for command in commands:
+        command_duration = 0
+        movement = 0
         if command.startswith("SNAP"):
+            movement = 0
+            command_duration = distance
             continue
+
         if command.startswith("FIN"):
+            movement = 0
+            command_duration = distance
             continue
+
         elif command.startswith("FW") or command.startswith("FS"):
             i += int(command[2:]) // 10
+            movement = int(command[2:])/10
+            command_duration = movement / MOTOR_SPEED
+
         elif command.startswith("BW") or command.startswith("BS"):
             i += int(command[2:]) // 10
+            command_duration = 2
+
         else:
             i += 1
+            command_duration = 2
+
         path_results.append(optimal_path[i].get_dict())
+        total_duration += command_duration
 
     for i in range(len(path_results)):
         if (i+1) == len(path_results): 
@@ -88,13 +107,15 @@ def path_finding():
     path_time.insert(0,0)
     print(f"Path Time: {path_time}")
     print(f"Commands: {commands}")
+    print(f"Duration:{total_duration}")
     
     return jsonify({
         "data": {
             'distance': distance,
             'path': path_results,
             'commands': commands,
-            'path_time': path_time
+            'path_time': path_time,
+            'duration': total_duration 
         },
         "error": None
     })
