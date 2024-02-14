@@ -1,4 +1,93 @@
-from consts import WIDTH, HEIGHT, Direction
+from consts import HEIGHT, WIDTH, Direction
+
+
+def coordinate_cal(path_results, command, i):
+    # if command is snap
+    if command.startswith("SNAP"):
+        present = path_results[i].copy()
+        present['s'] = 1
+        i += 1
+        path_results.append(present)
+        return path_results, i
+    
+    # if command is forward
+    if command.startswith("FW") or command.startswith("FS") or command.startswith("BW") or command.startswith("BS"):
+        # calculate distance
+        distance = int(command[2:])//10
+        # assign direction of travel
+        robot_direction = path_results[i]['d']
+        if robot_direction == 0:
+            axis, direction = 'y', 1
+        elif robot_direction == 4:
+            axis, direction = 'y', -1
+        elif robot_direction == 2:
+            axis, direction = 'x', 1
+        elif robot_direction == 6:
+            axis, direction = 'x', -1
+        # reverse instructions if command is backward
+        if command.startswith("BW") or command.startswith("BS"):
+            reverse = -1
+        else:
+            reverse = 1
+        # add each step along direction of travel    
+        for add_this in range(0, distance):
+            present = path_results[i].copy()
+            i+=1
+            if axis == 'x':
+                present['x'] = present['x'] + (1*direction *reverse)
+            elif axis == 'y':
+                present['y'] = present['y'] + (1*direction*reverse)
+            present['s'] = -1
+            path_results.append(present)
+        return path_results, i
+    
+    # if command is to turn backwards, BR00 = BW30 + 90 anticlockwise (d - 2) + BW10, BL00 = BW30 + 90 clockwise (d + 2) + BW10
+    if command.startswith("BR") or command.startswith("BL"):
+        # assign steps moving backward
+        path_results, i = coordinate_cal(path_results, "BW30", i)
+        # assign turn direction
+        if command.startswith("BR"):
+            turn = -2
+        else:
+            turn = 2
+        # assign turn step
+        present = path_results[i].copy()
+        i+=1
+        present['d'] = present['d'] + turn
+        if present['d'] == 8:
+            present['d'] = 0
+        elif present['d'] == -2:
+            present['d'] = 6
+        present['s'] = -1
+        path_results.append(present)
+        # assign step moving backward
+        path_results, i = coordinate_cal(path_results, "BW10", i)
+        return path_results, i
+
+    # if command is to turn forwards, FR00 = FW10 + 90 clockwise (d + 2) + FW30, FL00 = FW10 + 90 anticlockwise (d + 2) + FW30
+    if command.startswith("FR") or command.startswith("FL"):
+        # assign steps moving forward
+        path_results, i = coordinate_cal(path_results, "FW10", i)
+        # assign turn direction
+        if command.startswith("FR"):
+            turn = 2
+        else:
+            turn = -2
+        # assign turn step
+        present = path_results[i].copy()
+        i+=1
+        present['d'] = present['d'] + turn        
+        if present['d'] == 8:
+            present['d'] = 0
+        elif present['d'] == -2:
+            present['d'] = 6
+        present['s'] = -1
+        path_results.append(present)    
+        # assign steps moving forward
+        path_results, i = coordinate_cal(path_results, "FW30", i)
+        return path_results, i    
+    
+    return path_results, i    
 
 
 def is_valid(center_x: int, center_y: int):
