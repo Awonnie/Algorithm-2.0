@@ -17,7 +17,7 @@ model = None
 def status():
     """
     This is a health check endpoint to check if the server is running
-    :return: a json object with a key "result" and value "ok"
+    :return: a json object with a key "result" and value s"ok"
     """
     return jsonify({"result": "ok"})
 
