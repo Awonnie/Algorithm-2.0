@@ -1,12 +1,19 @@
 import time
 
+import cv2
+import supervision as sv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from inference import get_roboflow_model
 
 from algo.algo import MazeSolver
 from consts import MOTOR_SPEED
 from helper import command_generator, coordinate_cal
 from model import *
+
+# import a utility function for loading Roboflow models
+robomodel = get_roboflow_model(model_id= "image_recognition/3", api_key="8knDdTJZg79rGzgli7Ub") 
+
 
 app = Flask(__name__)
 CORS(app)
@@ -135,6 +142,34 @@ def path_finding():
     })
 
 
+# @app.route('/image', methods=['POST'])
+# def image_predict():
+#     """
+#     This is the main endpoint for the image prediction algorithm
+#     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
+#     """
+#     file = request.files['file']
+#     filename = file.filename
+#     file.save(os.path.join('uploads', filename))
+#     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
+#     constituents = file.filename.split("_")
+#     obstacle_id = constituents[1]
+
+#     ## Week 8 ## 
+#     signal = constituents[2].strip(".jpg")
+#     image_id = predict_image(filename, model, signal)
+
+#     ## Week 9 ## 
+#     # We don't need to pass in the signal anymore
+#     #image_id = predict_image_week_9(filename,model)
+
+#     # Return the obstacle_id and image_id
+#     result = {
+#         "obstacle_id": obstacle_id,
+#         "image_id": image_id
+#     }
+#     return jsonify(result)
+
 @app.route('/image', methods=['POST'])
 def image_predict():
     """
@@ -148,13 +183,13 @@ def image_predict():
     constituents = file.filename.split("_")
     obstacle_id = constituents[1]
 
-    ## Week 8 ## 
-    signal = constituents[2].strip(".jpg")
-    image_id = predict_image(filename, model, signal)
+    # Perform inference on the saved image
+    frame = cv2.imread(filename)  
+    results = robomodel.infer(frame)  #Predict Image here
 
-    ## Week 9 ## 
-    # We don't need to pass in the signal anymore
-    #image_id = predict_image_week_9(filename,model)
+    # Process results (this part needs to be adjusted based on your model's output)
+    detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+    image_id = process_detections(detections) 
 
     # Return the obstacle_id and image_id
     result = {
@@ -162,6 +197,11 @@ def image_predict():
         "image_id": image_id
     }
     return jsonify(result)
+
+def process_detections(detections):
+    image_id = class_id
+    return class_id
+
 
 @app.route('/stitch', methods=['GET'])
 def stitch():
