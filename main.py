@@ -189,7 +189,7 @@ def image_predict():
 
     # Process results (this part needs to be adjusted based on your model's output)
     detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-    image_id = process_detections(detections) 
+    image_id = detections['class_id']
 
     # Return the obstacle_id and image_id
     result = {
@@ -197,10 +197,6 @@ def image_predict():
         "image_id": image_id
     }
     return jsonify(result)
-
-def process_detections(detections):
-    image_id = class_id
-    return class_id
 
 
 @app.route('/stitch', methods=['GET'])
