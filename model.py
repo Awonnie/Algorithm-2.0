@@ -328,7 +328,7 @@ def stitch_image():
     """
     # Initialize path to save stitched image
     imgFolder = 'runs'
-    stitchedPath = os.path.join(imgFolder, f'stitched-{int(time.time())}.jpeg')
+    stitchedPath = os.path.join(imgFolder, f'stitched-{int(time.time())}.jpg') #changed fim jpeg to jpg
 
     # Find all files that ends with ".jpg" (this won't match the stitched images as we name them ".jpeg")
     imgPaths = glob.glob(os.path.join(imgFolder+"/detect/*/", "*.jpg"))

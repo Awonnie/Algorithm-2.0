@@ -181,22 +181,36 @@ def image_predict():
     file.save(os.path.join('uploads', filename))
     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
     constituents = file.filename.split("_")
+    print ("Constituents: ", constituents)
     obstacle_id = constituents[1]
 
-    # Perform inference on the saved image
-    frame = cv2.imread(filename)  
-    results = robomodel.infer(frame)  #Predict Image here
+    # Perform inference on the saved image, might have to change the file path to just (filename)
+    #frame = cv2.imread(os.path.join(filename))  
+    #for testing only
+    frame = cv2.imread(os.path.join('uploads', filename))  
 
-    # Process results (this part needs to be adjusted based on your model's output)
-    detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-    image_id = detections['class_id']
+    if frame is None:
+        print("Failed to load image")
+        result = {
+            "obstacle_id": 1,
+            "image_id": 40
+        }
 
-    # Return the obstacle_id and image_id
-    result = {
-        "obstacle_id": obstacle_id,
-        "image_id": image_id
-    }
+    else:
+        results = robomodel.infer(frame)
+        detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+        image_id = int(detections.class_id[0])
+        print("detections:", detections)
+
+        # Return the obstacle_id and image_id
+        result = {
+            "obstacle_id": obstacle_id,
+            "image_id": image_id
+        }
     return jsonify(result)
+
+    
+    
 
 
 @app.route('/stitch', methods=['GET'])
