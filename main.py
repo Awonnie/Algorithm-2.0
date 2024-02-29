@@ -156,9 +156,6 @@ def image_predict():
     print ("Constituents: ", constituents)
     obstacle_id = constituents[1]
 
-    # Perform inference on the saved image, might have to change the file path to just (filename)
-    #frame = cv2.imread(os.path.join(filename))  
-    #for testing only
     frame = cv2.imread(os.path.join('uploads', filename))  
 
     if frame is None:
@@ -181,7 +178,7 @@ def image_predict():
 
         ## Week 9 ## 
         # We don't need to pass in the signal anymore
-        #image_id = predict_image_week_9(filename,model)
+        # image_id = predict_image_week_9(filename,model)
 
         # Return the obstacle_id and image_id
         result = {
