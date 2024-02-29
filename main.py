@@ -12,7 +12,7 @@ from helper import command_generator, coordinate_cal
 from model import *
 
 # import a utility function for loading Roboflow models
-robomodel = get_roboflow_model(model_id= "image_recognition/3", api_key="8knDdTJZg79rGzgli7Ub") 
+robomodel = get_roboflow_model(model_id= "mdp_grp27/3", api_key="8knDdTJZg79rGzgli7Ub") 
 
 
 app = Flask(__name__)
@@ -142,34 +142,6 @@ def path_finding():
     })
 
 
-# @app.route('/image', methods=['POST'])
-# def image_predict():
-#     """
-#     This is the main endpoint for the image prediction algorithm
-#     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
-#     """
-#     file = request.files['file']
-#     filename = file.filename
-#     file.save(os.path.join('uploads', filename))
-#     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
-#     constituents = file.filename.split("_")
-#     obstacle_id = constituents[1]
-
-#     ## Week 8 ## 
-#     signal = constituents[2].strip(".jpg")
-#     image_id = predict_image(filename, model, signal)
-
-#     ## Week 9 ## 
-#     # We don't need to pass in the signal anymore
-#     #image_id = predict_image_week_9(filename,model)
-
-#     # Return the obstacle_id and image_id
-#     result = {
-#         "obstacle_id": obstacle_id,
-#         "image_id": image_id
-#     }
-#     return jsonify(result)
-
 @app.route('/image', methods=['POST'])
 def image_predict():
     """
@@ -199,8 +171,17 @@ def image_predict():
     else:
         results = robomodel.infer(frame)
         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-        image_id = int(detections.class_id[0])
+
+        class_name = int(detections.data.get['class_name'])
+        numeric_part = ''.join(filter(str.isdigit, class_name))
+        image_id = int(numeric_part)  # Convert the extracted numeric part to an integer
+
         print("detections:", detections)
+        print("image:",image_id)
+
+        ## Week 9 ## 
+        # We don't need to pass in the signal anymore
+        #image_id = predict_image_week_9(filename,model)
 
         # Return the obstacle_id and image_id
         result = {
@@ -209,8 +190,46 @@ def image_predict():
         }
     return jsonify(result)
 
-    
-    
+
+
+# @app.route('/image', methods=['POST'])
+# def image_predict():
+#     """
+#     This is the main endpoint for the image prediction algorithm
+#     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
+#     """
+#     file = request.files['file']
+#     filename = file.filename
+#     file.save(os.path.join('uploads', filename))
+#     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
+#     constituents = file.filename.split("_")
+#     print ("Constituents: ", constituents)
+#     obstacle_id = constituents[1]
+
+#     # Perform inference on the saved image, might have to change the file path to just (filename)
+#     #frame = cv2.imread(os.path.join(filename))  
+#     #for testing only
+#     frame = cv2.imread(os.path.join('uploads', filename))  
+
+#     if frame is None:
+#         print("Failed to load image")
+#         result = {
+#             "obstacle_id": 1,
+#             "image_id": 40
+#         }
+
+#     else:
+#         results = robomodel.infer(frame)
+#         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+#         image_id = int(detections.class_id[0])
+#         print("detections:", detections)
+
+#         # Return the obstacle_id and image_id
+#         result = {
+#             "obstacle_id": obstacle_id,
+#             "image_id": image_id
+#         }
+#     return jsonify(result)
 
 
 @app.route('/stitch', methods=['GET'])
