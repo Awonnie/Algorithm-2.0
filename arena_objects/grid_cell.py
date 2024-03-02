@@ -10,19 +10,7 @@ class GridCell:
         self.screenshot_id = screenshot_id
         self.penalty = penalty  # Penalty for the view point of taking picture
 
-    def cmp_position(self, x, y) -> bool:
-        """Compare given (x,y) position with cell state's position
-
-        Args:
-            x (int): x coordinate
-            y (int): y coordinate
-
-        Returns:
-            bool: True if same, False otherwise
-        """
-        return self.x == x and self.y == y
-
-    def is_eq(self, x, y, direction):
+    def is_equal(self, x, y, direction):
         """Compare given x, y, direction with cell state's position and direction
 
         Args:

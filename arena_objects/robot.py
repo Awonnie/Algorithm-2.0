@@ -15,13 +15,12 @@ class Robot:
         Internals:
             states: List of cell states of the robot's historical path
         """
-        self.states: List[GridCell] = [
-            GridCell(center_x, center_y, start_direction)]
+        self.robot_cell: List[GridCell] = [GridCell(center_x, center_y, start_direction)]
 
-    def get_start_state(self):
+    def get_robot_cell(self):
         """Returns the starting cell state of the robot
 
         Returns:
             GridCell: starting cell state of robot (x,y,d)
         """
-        return self.states[0]
+        return self.robot_cell[0]

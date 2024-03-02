@@ -1,4 +1,4 @@
-from consts import HEIGHT, WIDTH
+from consts import GRID_HEIGHT, GRID_WIDTH
 from direction import Direction
 
 def coordinate_cal(path_results, command, i):

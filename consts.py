@@ -13,9 +13,9 @@ ROBOT_SPEED =  2 # measured as cells/seconds, in other words, it can reach X amo
 '''
 Grid Constants
 '''
-EXPANDED_CELL = 1 # for both agent and obstacles
-WIDTH = 20
-HEIGHT = 20
+VIRTUAL_CELLS = 3 # used for object avoidance
+GRID_WIDTH = 20
+GRID_HEIGHT = 20
 
 '''
 Algorithm Constants
