@@ -6,6 +6,9 @@ import time
 
 # Local Imports
 from path_finding.path_finder import PathFinder
+from arena_objects.robot import Robot
+from arena_objects.arena import Arena
+from arena_objects.obstacle import Obstacle
 from path_finding.helper import command_generator, coordinate_cal
 from consts import ROBOT_SPEED
 
@@ -28,18 +31,21 @@ def path_finder():
     robot_x, robot_y = content['robot_x'], content['robot_y']
     robot_direction = int(content['robot_dir'])
 
-    # Initialize PathFinder object with robot size of 20x20, bottom left corner of robot at (1,1), facing north, and whether to use a big turn or not.
-    path_finder = PathFinder(20, 20, robot_x, robot_y, robot_direction, big_turn=None)
-
-    # Add each obstacle into the PathFinder. Each obstacle is defined by its x,y positions, its direction, and its id
+    # Initialize the Arena, Robot and Obstacles
+    robot = Robot(robot_x, robot_y, robot_direction)
+    arena = Arena(arena_height=20, arena_width=20, robot=robot)
     for ob in obstacles:
-        path_finder.add_obstacle(ob['x'], ob['y'], ob['d'], ob['id'])
+        obstacle_to_add = Obstacle(ob['x'], ob['y'], ob['d'], ob['id'])
+        arena.add_obstacle(obstacle_to_add)
+
+    # Creates the PathFinder object
+    path_finder = PathFinder(arena, big_turn=None)
 
     search_start_time = time.time()
     # Get shortest path
-    optimal_path, distance = path_finder.get_optimal_order_dp(retrying=retrying)
+    optimal_path, total_distance = path_finder.get_shortest_path(retrying=retrying)
     print(f"Time taken to find shortest path using A* search: {time.time() - search_start_time}s")
-    print(f"Distance to travel: {distance} units")
+    print(f"Distance to travel: {total_distance} units")
     
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
@@ -82,9 +88,9 @@ def path_finder():
         if (path_results[i].get('s')==1):
             path_execution_time.append(2.0)
 
-        path_execution_time.append(PathFinder.compute_coord_distance(
-            path_results[i].get('x'), path_results[i].get('y'),
-            path_results[i+1].get('x'), path_results[i+1].get('y')
+        path_execution_time.append(path_finder._PathFinder__compute_distance_between(
+            x1 = path_results[i].get('x'), y1 = path_results[i].get('y'),
+            x2 = path_results[i+1].get('x'), y2 = path_results[i+1].get('y')
             ) / ROBOT_SPEED)
         
     path_execution_time.insert(0,0)
@@ -96,7 +102,7 @@ def path_finder():
     
     return jsonify({
         "data": {
-            'distance': distance,
+            'distance': total_distance,
             'path': path_results,
             'commands': commands,
             'path_execution_time': path_execution_time,

@@ -6,10 +6,7 @@ import math
 from typing import List
 
 from direction import Direction
-from arena_objects.arena import Arena
-from arena_objects.robot import Robot
 from arena_objects.grid_cell import GridCell
-from arena_objects.obstacle import Obstacle
 from consts import TURN_FACTOR, ITERATIONS, TURN_RADIUS, SAFE_COST
 
 turn_wrt_big_turns = [[3 * TURN_RADIUS, TURN_RADIUS],
@@ -25,17 +22,13 @@ movement_directions = [
 class PathFinder:
     def __init__(
             self,
-            size_x: int,
-            size_y: int,
-            robot_x: int,
-            robot_y: int,
-            robot_direction: Direction,
+            arena,
             big_turn=None # the big_turn here is to allow 3-1 turn(0 - by default) | 4-2 turn(1)
     ):
         # Initialize a Arena object for the arena representation
-        self.arena = Arena(size_x, size_y)
+        self.arena = arena
         # Initialize a Robot object for robot representation
-        self.robot = Robot(robot_x, robot_y, robot_direction)
+        self.robot = arena.get_robot()
         # Create tables for paths and costs
         self.path_table = dict()
         self.cost_table = dict()
@@ -44,53 +37,20 @@ class PathFinder:
         else:
             self.big_turn = int(big_turn)
 
-    def add_obstacle(self, x: int, y: int, direction: Direction, obstacle_id: int):
-        """Add obstacle to MazeSolver object
-
-        Args:
-            x (int): x coordinate of obstacle
-            y (int): y coordinate of obstacle
-            direction (Direction): Direction of obstacle
-            obstacle_id (int): ID of obstacle
-        """
-        # Create an obstacle object
-        obstacle = Obstacle(x, y, direction, obstacle_id)
-        # Add created obstacle to grid object
-        self.arena.add_obstacle(obstacle)
-
-    def reset_obstacles(self):
-        self.arena.reset_obstacles()
-
-    @staticmethod
-    def rotation_cost(d1, d2):
+    def __rotation_cost(self, d1, d2):
         diff = abs(d1 - d2)
         return min(diff, 8 - diff)
 
-    @staticmethod
-    def compute_coord_distance(x1: int, y1: int, x2: int, y2: int, level=1):
-        """Compute the L-n distance between two coordinates
-
-        Args:
-            x1 (int)
-            y1 (int)
-            x2 (int)
-            y2 (int)
-            level (int, optional): L-n distance to compute. Defaults to 1.
-
-        Returns:
-            float: L-n distance between the two given points
-        """
-        horizontal_distance = x1 - x2
-        vertical_distance = y1 - y2
-
-        # Euclidean distance
-        if level == 2:
-            return math.sqrt(horizontal_distance ** 2 + vertical_distance ** 2)
-
-        return abs(horizontal_distance) + abs(vertical_distance)
-
-    @staticmethod
-    def compute_state_distance(start_state: GridCell, end_state: GridCell, level=1):
+    def __compute_distance_between(
+            self, 
+            start_state: GridCell = None, 
+            end_state: GridCell = None, 
+            x1: int = None, 
+            y1: int = None, 
+            x2: int = None, 
+            y2: int = None, 
+            level = 1
+            ):
         """Compute the L-n distance between two cell states
 
         Args:
@@ -101,10 +61,21 @@ class PathFinder:
         Returns:
             float: L-n distance between the two given cell states
         """
-        return PathFinder.compute_coord_distance(start_state.x, start_state.y, end_state.x, end_state.y, level)
+        if not start_state and not end_state:
+            horizontal_distance = x1 - x2
+            vertical_distance = y1 - y2
+        else:
+            horizontal_distance = start_state.x - end_state.x
+            vertical_distance = start_state.y - end_state.y
 
-    @staticmethod
-    def get_visit_options(n):
+
+        # Euclidean distance
+        if level == 2:
+            return math.sqrt(horizontal_distance ** 2 + vertical_distance ** 2)
+
+        return abs(horizontal_distance) + abs(vertical_distance)
+
+    def __get_visit_options(self, n):
         """Generate all possible n-digit binary strings
 
         Args:
@@ -122,17 +93,24 @@ class PathFinder:
         s.sort(key=lambda x: x.count('1'), reverse=True)
         return s
 
-    def get_optimal_order_dp(self, retrying) -> List[GridCell]:
-        distance = 1e9
+    def get_shortest_path(self, retrying) -> List[GridCell]:
+        '''
+        Main Function to calculate the shortest path to go to all obstacles once
+
+        Args:
+            retrying (boolean): Whether or not the robot needs to retry
+
+        Returns:
+            optimal_path (List):   List of paths for the robot to follow
+            total_distance (int):   Total Distance required to travel in units
+        '''
+        total_distance = 1e9
         optimal_path = []
 
-        #print(f"Inside get_optimal_order_dp: retrying = {retrying}")
         # Get all possible positions that can view the obstacles
         all_view_positions = self.arena.get_viewing_positions(retrying)
-        #print(f"all_view_positions: {all_view_positions}")
-        #print(f"All view position: {all_view_positions}")
 
-        for op in self.get_visit_options(len(all_view_positions)):
+        for op in self.__get_visit_options(len(all_view_positions)):
             # op is binary string of length len(all_view_positions) == len(obstacles)
             # If index == 1 means the view_positions[index] is selected to visit, otherwise drop
 
@@ -157,9 +135,9 @@ class PathFinder:
                     #print("obstacle: {}\n".format(self.grid.obstacles[idx]))
 
             # Generate the path cost for the items
-            self.path_cost_generator(items)
+            self.__path_cost_generator(items)
             combination = []
-            self.generate_combination(cur_view_positions, 0, [], combination, [ITERATIONS])
+            self.__generate_combination(cur_view_positions, 0, [], combination, [ITERATIONS])
 
             for c in combination: # run the algo some times ->
                 visited_candidates = [0] # add the start state of the robot
@@ -186,11 +164,11 @@ class PathFinder:
                 _permutation, _distance = solve_tsp_dynamic_programming(cost_np)
                 # print(f"fixed_cost = {fixed_cost}")
                 # print(f"distance = {_distance}")
-                if _distance + fixed_cost >= distance:
+                if _distance + fixed_cost >= total_distance:
                     continue
 
                 optimal_path = [items[0]]
-                distance = _distance + fixed_cost
+                total_distance = _distance + fixed_cost
 
                 for i in range(len(_permutation) - 1):
                     from_item = items[visited_candidates[_permutation[i]]]
@@ -206,10 +184,9 @@ class PathFinder:
                 # if found optimal path, return
                 break
             
-        return optimal_path, distance
+        return optimal_path, total_distance
 
-    @staticmethod
-    def generate_combination(view_positions, index, current, result, iteration_left):
+    def __generate_combination(self, view_positions, index, current, result, iteration_left):
         if index == len(view_positions):
             result.append(current[:])
             return
@@ -220,10 +197,10 @@ class PathFinder:
         iteration_left[0] -= 1
         for j in range(len(view_positions[index])):
             current.append(j)
-            PathFinder.generate_combination(view_positions, index + 1, current, result, iteration_left)
+            self.__generate_combination(view_positions, index + 1, current, result, iteration_left)
             current.pop()
 
-    def get_safe_cost(self, x, y):
+    def __get_safe_cost(self, x, y):
         """Get the safe cost of a particular x,y coordinate wrt obstacles that are exactly 2 units away from it in both x and y directions
 
         Args:
@@ -245,7 +222,7 @@ class PathFinder:
 
         return 0
 
-    def get_neighbors(self, x, y, direction):  # TODO: see the behavior of the robot and adjust...
+    def __get_neighbors(self, x, y, direction):  # TODO: see the behavior of the robot and adjust...
         """
         Return a list of tuples with format:
         newX, newY, new_direction
@@ -265,12 +242,12 @@ class PathFinder:
                 # Check for valid position
                 if self.arena.is_reachable(x + dx, y + dy):  # go forward;
                     # Get safe cost of destination
-                    safe_cost = self.get_safe_cost(x + dx, y + dy)
+                    safe_cost = self.__get_safe_cost(x + dx, y + dy)
                     neighbors.append((x + dx, y + dy, md, safe_cost))
                 # Check for valid position
                 if self.arena.is_reachable(x - dx, y - dy):  # go back;
                     # Get safe cost of destination
-                    safe_cost = self.get_safe_cost(x - dx, y - dy)
+                    safe_cost = self.__get_safe_cost(x - dx, y - dy)
                     neighbors.append((x - dx, y - dy, md, safe_cost))
 
             else:  # consider 8 cases
@@ -285,91 +262,91 @@ class PathFinder:
                     # Check for valid position
                     if self.arena.is_reachable(x + bigger_change, y + smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
                         # Get safe cost of destination
-                        safe_cost = self.get_safe_cost(x + bigger_change, y + smaller_change)
+                        safe_cost = self.__get_safe_cost(x + bigger_change, y + smaller_change)
                         neighbors.append((x + bigger_change, y + smaller_change, md, safe_cost + 10))
 
                     # Check for valid position
                     if self.arena.is_reachable(x - smaller_change, y - bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
                         # Get safe cost of destination
-                        safe_cost = self.get_safe_cost(x - smaller_change, y - bigger_change)
+                        safe_cost = self.__get_safe_cost(x - smaller_change, y - bigger_change)
                         neighbors.append((x - smaller_change, y - bigger_change, md, safe_cost + 10))
 
                 if direction == Direction.EAST and md == Direction.NORTH:
                     if self.arena.is_reachable(x + smaller_change, y + bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + smaller_change, y + bigger_change)
+                        safe_cost = self.__get_safe_cost(x + smaller_change, y + bigger_change)
                         neighbors.append((x + smaller_change, y + bigger_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x - bigger_change, y - smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - bigger_change, y - smaller_change)
+                        safe_cost = self.__get_safe_cost(x - bigger_change, y - smaller_change)
                         neighbors.append((x - bigger_change, y - smaller_change, md, safe_cost + 10))
 
                 # east <-> south
                 if direction == Direction.EAST and md == Direction.SOUTH:
                     
                     if self.arena.is_reachable(x + smaller_change, y - bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + smaller_change, y - bigger_change)
+                        safe_cost = self.__get_safe_cost(x + smaller_change, y - bigger_change)
                         neighbors.append((x + smaller_change, y - bigger_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x - bigger_change, y + smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - bigger_change, y + smaller_change)
+                        safe_cost = self.__get_safe_cost(x - bigger_change, y + smaller_change)
                         neighbors.append((x - bigger_change, y + smaller_change, md, safe_cost + 10))
 
                 if direction == Direction.SOUTH and md == Direction.EAST:
                     if self.arena.is_reachable(x + bigger_change, y - smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + bigger_change, y - smaller_change)
+                        safe_cost = self.__get_safe_cost(x + bigger_change, y - smaller_change)
                         neighbors.append((x + bigger_change, y - smaller_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x - smaller_change, y + bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - smaller_change, y + bigger_change)
+                        safe_cost = self.__get_safe_cost(x - smaller_change, y + bigger_change)
                         neighbors.append((x - smaller_change, y + bigger_change, md, safe_cost + 10))
 
                 # south <-> west
                 if direction == Direction.SOUTH and md == Direction.WEST:
                     if self.arena.is_reachable(x - bigger_change, y - smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - bigger_change, y - smaller_change)
+                        safe_cost = self.__get_safe_cost(x - bigger_change, y - smaller_change)
                         neighbors.append((x - bigger_change, y - smaller_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x + smaller_change, y + bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + smaller_change, y + bigger_change)
+                        safe_cost = self.__get_safe_cost(x + smaller_change, y + bigger_change)
                         neighbors.append((x + smaller_change, y + bigger_change, md, safe_cost + 10))
 
                 if direction == Direction.WEST and md == Direction.SOUTH:
                     if self.arena.is_reachable(x - smaller_change, y - bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - smaller_change, y - bigger_change)
+                        safe_cost = self.__get_safe_cost(x - smaller_change, y - bigger_change)
                         neighbors.append((x - smaller_change, y - bigger_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x + bigger_change, y + smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + bigger_change, y + smaller_change)
+                        safe_cost = self.__get_safe_cost(x + bigger_change, y + smaller_change)
                         neighbors.append((x + bigger_change, y + smaller_change, md, safe_cost + 10))
 
                 # west <-> north
                 if direction == Direction.WEST and md == Direction.NORTH:
                     if self.arena.is_reachable(x - smaller_change, y + bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - smaller_change, y + bigger_change)
+                        safe_cost = self.__get_safe_cost(x - smaller_change, y + bigger_change)
                         neighbors.append((x - smaller_change, y + bigger_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x + bigger_change, y - smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + bigger_change, y - smaller_change)
+                        safe_cost = self.__get_safe_cost(x + bigger_change, y - smaller_change)
                         neighbors.append((x + bigger_change, y - smaller_change, md, safe_cost + 10))
 
                 if direction == Direction.NORTH and md == Direction.WEST:
                     if self.arena.is_reachable(x + smaller_change, y - bigger_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x + smaller_change, y - bigger_change)
+                        safe_cost = self.__get_safe_cost(x + smaller_change, y - bigger_change)
                         neighbors.append((x + smaller_change, y - bigger_change, md, safe_cost + 10))
 
                     if self.arena.is_reachable(x - bigger_change, y + smaller_change, turn = True) and self.arena.is_reachable(x, y, preTurn = True):
-                        safe_cost = self.get_safe_cost(x - bigger_change, y + smaller_change)
+                        safe_cost = self.__get_safe_cost(x - bigger_change, y + smaller_change)
                         neighbors.append((x - bigger_change, y + smaller_change, md, safe_cost + 10))
 
         return neighbors
 
-    def path_cost_generator(self, states: List[GridCell]):
+    def __path_cost_generator(self, states: List[GridCell]):
         """Generate the path cost between the input states and update the tables accordingly
 
         Args:
             states (List[GridCell]): cell states to visit
         """
-        def record_path(start, end, parent: dict, cost: int):
+        def __record_path(start, end, parent: dict, cost: int):
 
             # Update cost table for the (start,end) and (end,start) edges
             self.cost_table[(start, end)] = cost
@@ -388,7 +365,7 @@ class PathFinder:
             self.path_table[(start, end)] = path[::-1]
             self.path_table[(end, start)] = path
 
-        def astar_search(start: GridCell, end: GridCell):
+        def __astar_search(start: GridCell, end: GridCell):
             # astar search algo with three states: x, y, direction
 
             # If it is already done before, return
@@ -402,7 +379,7 @@ class PathFinder:
 
             # format of each item in heap: (f_distance of node, x coord of node, y coord of node)
             # heap in Python is a min-heap
-            heap = [(self.compute_state_distance(start, end), start.x, start.y, start.direction)]
+            heap = [(self.__compute_distance_between(start, end), start.x, start.y, start.direction)]
             parent = dict()
             visited = set()
 
@@ -416,17 +393,17 @@ class PathFinder:
 
                 # Goal testing, checking if popped node is the goal node
                 if end.is_equal(cur_x, cur_y, cur_direction):
-                    record_path(start, end, parent, g_distance[(cur_x, cur_y, cur_direction)])
+                    __record_path(start, end, parent, g_distance[(cur_x, cur_y, cur_direction)])
                     return
 
                 visited.add((cur_x, cur_y, cur_direction))
                 cur_distance = g_distance[(cur_x, cur_y, cur_direction)]
 
-                for next_x, next_y, new_direction, safe_cost in self.get_neighbors(cur_x, cur_y, cur_direction):
+                for next_x, next_y, new_direction, safe_cost in self.__get_neighbors(cur_x, cur_y, cur_direction):
                     if (next_x, next_y, new_direction) in visited:
                         continue
 
-                    move_cost = self.rotation_cost(new_direction, cur_direction) * TURN_FACTOR + 1 + safe_cost
+                    move_cost = self.__rotation_cost(new_direction, cur_direction) * TURN_FACTOR + 1 + safe_cost
 
                     # the cost to check if any obstacles that considered too near the robot; if it
                     # safe_cost =
@@ -434,7 +411,7 @@ class PathFinder:
                     # new cost is calculated by the cost to reach current state + cost to move from
                     # current state to new state + heuristic cost from new state to end state
                     next_cost = cur_distance + move_cost + \
-                                self.compute_coord_distance(next_x, next_y, end.x, end.y)
+                                self.__compute_distance_between(x1 = next_x, y1 = next_y, x2 = end.x, y2 = end.y)
 
                     if (next_x, next_y, new_direction) not in g_distance or \
                             g_distance[(next_x, next_y, new_direction)] > cur_distance + move_cost:
@@ -446,4 +423,4 @@ class PathFinder:
         # Nested loop through all the state pairings
         for i in range(len(states) - 1):
             for j in range(i + 1, len(states)):
-                astar_search(states[i], states[j])
+                __astar_search(states[i], states[j])
