@@ -5,11 +5,8 @@ from flask import Blueprint, jsonify, request
 import time
 
 # Local Imports
-from path_finding.path_finder import PathFinder
-from arena_objects.robot import Robot
-from arena_objects.arena import Arena
-from arena_objects.obstacle import Obstacle
-from path_finding.helper import command_generator, coordinate_cal
+from arena_objects import Robot, Obstacle, Arena
+from path_finding import PathFinder, command_generator, coordinate_cal
 from consts import ROBOT_SPEED
 
 path = Blueprint('path', __name__)
@@ -95,10 +92,10 @@ def path_finder():
         
     path_execution_time.insert(0,0)
 
-    print(f"Path: {path_results}")
-    print(f"Path Execution Time: {path_execution_time}")
-    print(f"Commands: {commands}")
-    print(f"Duration:{total_duration}")
+    # print(f"Path: {path_results}")
+    # print(f"Path Execution Time: {path_execution_time}")
+    # print(f"Commands: {commands}")
+    # print(f"Duration:{total_duration}")
     
     return jsonify({
         "data": {
