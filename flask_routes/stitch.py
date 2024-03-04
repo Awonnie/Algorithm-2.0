@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify
 
+from model import *
+
 stitch = Blueprint('stitch', __name__)
 
 @stitch.route('/stitch', methods=['GET'])
@@ -12,6 +14,11 @@ def stitch_images():
     """
 
     # Call Stitiching method here
+    img = stitch_image()
+    img.show()
+    img2 = stitch_image_own()
+    img2.show()
+    return jsonify({"result": "ok"})
 
 
     # Return an okay response
