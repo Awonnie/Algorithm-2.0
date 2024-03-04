@@ -6,15 +6,17 @@ import cv2
 import supervision as sv
 from flask import Blueprint, jsonify, request
 from inference import get_roboflow_model
+import random
 
 # Local Imports
 from consts import CV_API_KEY, MODEL_ID
 
 image = Blueprint('image', __name__)
+
 # Initialise model
 robomodel = get_roboflow_model(model_id= MODEL_ID, api_key=CV_API_KEY) 
 
-@app.route('/image', methods=['POST'])
+@image.route('/image', methods=['POST'])
 def image_predict():
     """
     This is the main endpoint for the image prediction algorithm

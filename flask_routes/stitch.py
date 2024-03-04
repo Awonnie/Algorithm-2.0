@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from model import *
+from helper import *
 
 stitch = Blueprint('stitch', __name__)
 
@@ -18,8 +18,6 @@ def stitch_images():
     img.show()
     img2 = stitch_image_own()
     img2.show()
-    return jsonify({"result": "ok"})
 
-
-    # Return an okay response
+    # Return okay response
     return jsonify({"result": "ok"})
