@@ -38,6 +38,8 @@ def path_finding():
     # Get the json data from the request
     content = request.json
 
+    print(f"Obstacles={content}")
+
     # Get the obstacles, big_turn, retrying, robot_x, robot_y, and robot_direction from the json data
     obstacles = content['obstacles']
     # big_turn = int(content['big_turn'])
@@ -55,7 +57,7 @@ def path_finding():
     start = time.time()
     # Get shortest path
     optimal_path, distance = maze_solver.get_optimal_order_dp(retrying=retrying)
-    print(f"Time taken to find shortest path using A* search: {time.time() - start}s")
+    #print(f"Time taken to find shortest path using A* search: {time.time() - start}s")
     print(f"Distance to travel: {distance} units")
     
     # Based on the shortest path, generate commands for the robot
@@ -127,8 +129,27 @@ def path_finding():
     print(f"Path: {path_results}")
     print(f"Path Time: {path_time}")
     print(f"Path: {path_results}")
-    print(f"Commands: {commands}")
     print(f"Duration:{total_duration}")
+
+    #edit the path results here:
+
+    print(f"Commands after: {commands}")
+    commands.clear()
+    # commands.remove("FIN")
+    # commands.remove("SNAP2_C")
+    #commands.append("FW10")
+    #commands.append("BW20")
+    commands.append("FL00")
+    commands.append("FW20")
+    commands.append("FR00")
+    commands.append("BW30")
+    commands.append("FR00")
+    commands.append("SNAP2_C")
+
+
+    
+    commands.append("FIN")
+    print(f"Commands after: {commands}")
     
     return jsonify({
         "data": {
@@ -162,12 +183,15 @@ def image_predict():
         print("Failed to load image")
         result = {
             "obstacle_id": 1,
-            "image_id": 40
+            "image_id": 23
         }
 
     else:
-        results = robomodel.infer(frame)
+        results = robomodel.infer(image = frame,
+                                  confidence = 0.5,
+                                  iou_threshold=0.5)
         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+
 
         class_name = int(detections.data.get['class_name'])
         numeric_part = ''.join(filter(str.isdigit, class_name))
