@@ -327,11 +327,11 @@ def stitch_image():
     Stitches the images in the folder together and saves it into runs/stitched folder
     """
     # Initialize path to save stitched image
-    imgFolder = 'runs'
+    imgFolder = 'uploads'
     stitchedPath = os.path.join(imgFolder, f'stitched-{int(time.time())}.jpg') #changed fim jpeg to jpg
 
     # Find all files that ends with ".jpg" (this won't match the stitched images as we name them ".jpeg")
-    imgPaths = glob.glob(os.path.join(imgFolder+"/detect/*/", "*.jpg"))
+    imgPaths = glob.glob(os.path.join(imgFolder, "*.jpg"))
     # Open all images
     images = [Image.open(x) for x in imgPaths]
     # Get the width and height of each image
@@ -352,7 +352,7 @@ def stitch_image():
     # Move original images to "originals" subdirectory
     for img in imgPaths:
         shutil.move(img, os.path.join(
-            "runs", "originals", os.path.basename(img)))
+            "uploads", "originals", os.path.basename(img)))
 
     return stitchedImg
 

@@ -126,30 +126,48 @@ def path_finding():
         
 
     path_time.insert(0,0)
-    print(f"Path: {path_results}")
-    print(f"Path Time: {path_time}")
-    print(f"Path: {path_results}")
-    print(f"Duration:{total_duration}")
+    # print(f"Path: {path_results}")
+    # print(f"Path Time: {path_time}")
+    # print(f"Path: {path_results}")
+    # print(f"Duration:{total_duration}")
 
     #edit the path results here:
 
     print(f"Commands after: {commands}")
-    commands.clear()
+    # commands.clear()
     # commands.remove("FIN")
     # commands.remove("SNAP2_C")
     #commands.append("FW10")
     #commands.append("BW20")
-    commands.append("FL00")
-    commands.append("FW20")
-    commands.append("FR00")
-    commands.append("BW30")
-    commands.append("FR00")
-    commands.append("SNAP2_C")
+    # commands.append("FL00")
+    # commands.append("FW20")
+    # commands.append("FR00")
+    # commands.append("BW30")
+    # commands.append("FR00")
 
 
-    
-    commands.append("FIN")
+    # commands.append("SNAP1_C")
+    # commands.append("SNAP2_C")
+    # commands.append("SNAP3_C")
+    # commands.append("FIN")
+
     print(f"Commands after: {commands}")
+
+    #clear all the files for image later here
+    for filename in os.listdir('own_results'):
+        if filename.endswith(".jpg"):
+            file_path = os.path.join('own_results',filename)
+            os.remove(file_path)
+
+    for filename in os.listdir('uploads'):
+        if filename.endswith(".jpg"):
+            file_path = os.path.join('uploads',filename)
+            os.remove(file_path)
+
+    for filename in os.listdir('uploads/originals'):
+        if filename.endswith(".jpg"):
+            file_path = os.path.join('uploads/originals',filename)
+            os.remove(file_path)
     
     return jsonify({
         "data": {
@@ -192,10 +210,27 @@ def image_predict():
                                   iou_threshold=0.5)
         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
 
+        print(f"Detections: {detections.data}")
+        print(f"Detections: {detections.data['class_name'][0]}")
 
-        class_name = int(detections.data.get['class_name'])
+        class_name = detections.data['class_name'][0]
         numeric_part = ''.join(filter(str.isdigit, class_name))
         image_id = int(numeric_part)  # Convert the extracted numeric part to an integer
+
+        # Annotate the frame
+        bounding_box_annotator = sv.BoundingBoxAnnotator()
+        label_annotator = sv.LabelAnnotator()
+        # Create supervision annotators
+        annotated_frame = bounding_box_annotator.annotate(scene=frame, detections=detections)
+        annotated_frame = label_annotator.annotate(scene=annotated_frame, detections=detections)
+
+        # Generate a unique filename for the annotated image
+        rand = random.randint(1000, 9999)
+        annotated_filename = f"own_results/annotated_image_{class_name}_{rand}.jpg"
+        
+        # Save the annotated image
+        cv2.imwrite(annotated_filename, annotated_frame)
+
 
         print("detections:", detections)
         print("image:",image_id)
@@ -210,47 +245,6 @@ def image_predict():
             "image_id": image_id
         }
     return jsonify(result)
-
-
-
-# @app.route('/image', methods=['POST'])
-# def image_predict():
-#     """
-#     This is the main endpoint for the image prediction algorithm
-#     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
-#     """
-#     file = request.files['file']
-#     filename = file.filename
-#     file.save(os.path.join('uploads', filename))
-#     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
-#     constituents = file.filename.split("_")
-#     print ("Constituents: ", constituents)
-#     obstacle_id = constituents[1]
-
-#     # Perform inference on the saved image, might have to change the file path to just (filename)
-#     #frame = cv2.imread(os.path.join(filename))  
-#     #for testing only
-#     frame = cv2.imread(os.path.join('uploads', filename))  
-
-#     if frame is None:
-#         print("Failed to load image")
-#         result = {
-#             "obstacle_id": 1,
-#             "image_id": 40
-#         }
-
-#     else:
-#         results = robomodel.infer(frame)
-#         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-#         image_id = int(detections.class_id[0])
-#         print("detections:", detections)
-
-#         # Return the obstacle_id and image_id
-#         result = {
-#             "obstacle_id": obstacle_id,
-#             "image_id": image_id
-#         }
-#     return jsonify(result)
 
 
 @app.route('/stitch', methods=['GET'])
