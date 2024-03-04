@@ -420,6 +420,7 @@ class PathFinder:
                         heapq.heappush(heap, (next_cost, next_x, next_y, new_direction))
 
         # Nested loop through all the state pairings
+        print(f"States: {states}")
         for i in range(len(states) - 1):
             for j in range(i + 1, len(states)):
                 __astar_search(states[i], states[j])

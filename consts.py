@@ -13,7 +13,7 @@ ROBOT_SPEED =  2 # measured as cells/seconds, in other words, it can reach X amo
 '''
 Grid Constants
 '''
-VIRTUAL_CELLS = 3 # used for object avoidance
+VIRTUAL_CELLS = 4 # used for object avoidance
 GRID_WIDTH = 20
 GRID_HEIGHT = 20
 
