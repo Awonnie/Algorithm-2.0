@@ -22,14 +22,16 @@ def image_predict():
     This is the main endpoint for the image prediction algorithm
     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
     """
+    print(f"Request: {request.files}")
     file = request.files['file']
     filename = file.filename
     file.save(os.path.join('uploads', filename))
     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
     constituents = file.filename.split("_")
-    print ("Constituents: ", constituents)
+    # print ("Constituents: ", constituents)
     obstacle_id = constituents[1]
 
+    # print(f"file: {file}")
     frame = cv2.imread(os.path.join('uploads', filename))  
 
     if frame is None:
@@ -44,9 +46,6 @@ def image_predict():
                                   confidence = 0.5,
                                   iou_threshold=0.5)
         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-
-        print(f"Detections: {detections.data}")
-        print(f"Detections: {detections.data['class_name'][0]}")
 
         class_name = detections.data['class_name'][0]
         numeric_part = ''.join(filter(str.isdigit, class_name))
@@ -67,8 +66,8 @@ def image_predict():
         cv2.imwrite(annotated_filename, annotated_frame)
 
 
-        print("detections:", detections)
-        print("image:",image_id)
+        # print("detections:", detections)
+        # print("image:",image_id)
 
         ## Week 9 ## 
         # We don't need to pass in the signal anymore

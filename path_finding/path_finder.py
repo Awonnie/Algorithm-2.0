@@ -111,7 +111,7 @@ class PathFinder:
         all_view_positions = self.arena.get_viewing_positions(retrying)
 
         for op in self.__get_binary_strings(len(all_view_positions)):
-            print(f"op is: {op}")
+            # print(f"op is: {op}")
             # op is binary string of length len(all_view_positions) == len(obstacles)
             # If index == 1 means the view_positions[index] is selected to visit, otherwise drop
 
@@ -160,7 +160,7 @@ class PathFinder:
                         cost_np[e][s] = cost_np[s][e]
                 cost_np[:, 0] = 0
                 _permutation, _distance = solve_tsp_dynamic_programming(cost_np)
-                print(f"permutations: {_permutation}")
+                # print(f"permutations: {_permutation}")
                 if _distance + fixed_cost >= total_distance:
                     continue
 

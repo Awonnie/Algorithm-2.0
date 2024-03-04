@@ -95,7 +95,7 @@ def path_finder():
 
     # print(f"Path: {path_results}")
     # print(f"Path Execution Time: {path_execution_time}")
-    # print(f"Commands: {commands}")
+    print(f"Commands: {commands}")
     # print(f"Duration:{total_duration}")
 
     for filename in os.listdir('own_results'):

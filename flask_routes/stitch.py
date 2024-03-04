@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 
-from helper import *
+from .helper import *
 
 stitch = Blueprint('stitch', __name__)
 
