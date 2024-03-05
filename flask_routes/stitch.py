@@ -14,9 +14,9 @@ def stitch_images():
     """
 
     # Call Stitiching method here
-    img = stitch_image()
+    img = stitch_raw_imgs()
     img.show()
-    img2 = stitch_image_own()
+    img2 = stitch_annotated_imgs()
     img2.show()
 
     # Return okay response

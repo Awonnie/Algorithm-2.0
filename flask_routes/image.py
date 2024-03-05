@@ -21,6 +21,9 @@ robomodel = get_roboflow_model(model_id= MODEL_ID, api_key=CV_API_KEY)
 def image_predict():
     """
     This is the main endpoint for the image prediction algorithm
+
+    filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg
+    
     :return: a json object with a key "result" and value a dictionary with keys "obstacle_id" and "image_id"
     """
     print(f"Request: {request.files}")
@@ -31,14 +34,15 @@ def image_predict():
     setup_img_folders()
     clear_images()
 
-    file.save(os.path.join('images', filename))
-    # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
+    raw_img_path = 'images/raw'
+    annotated_img_path = 'images/annotated'
+
+    # Save the raw images to raw_img_path
+    file.save(os.path.join(raw_img_path, filename))
     constituents = file.filename.split("_")
-    # print ("Constituents: ", constituents)
     obstacle_id = constituents[1]
 
-    # print(f"file: {file}")
-    frame = cv2.imread(os.path.join('images', filename))  
+    frame = cv2.imread(os.path.join(raw_img_path, filename))  
 
     if frame is None:
         print("Failed to load image")
@@ -46,42 +50,34 @@ def image_predict():
             "obstacle_id": 1,
             "image_id": 23
         }
+        return jsonify(result)
 
-    else:
-        results = robomodel.infer(image = frame,
-                                  confidence = 0.5,
-                                  iou_threshold=0.5)
-        detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+    results = robomodel.infer(image = frame,
+                                confidence = 0.5,
+                                iou_threshold=0.5)
+    detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
 
-        class_name = detections.data['class_name'][0]
-        numeric_part = ''.join(filter(str.isdigit, class_name))
-        image_id = int(numeric_part)  # Convert the extracted numeric part to an integer
+    class_name = detections.data['class_name'][0]
+    image_id = int(class_name[2:])
 
-        # Annotate the frame
-        bounding_box_annotator = sv.BoundingBoxAnnotator()
-        label_annotator = sv.LabelAnnotator()
-        # Create supervision annotators
-        annotated_frame = bounding_box_annotator.annotate(scene=frame, detections=detections)
-        annotated_frame = label_annotator.annotate(scene=annotated_frame, detections=detections)
+    # Annotate the frame
+    bounding_box_annotator = sv.BoundingBoxAnnotator()
+    label_annotator = sv.LabelAnnotator()
 
-        # Generate a unique filename for the annotated image
-        rand = random.randint(1000, 9999)
-        annotated_filename = f"own_results/annotated_image_{class_name}_{rand}.jpg"
-        
-        # Save the annotated image
-        cv2.imwrite(annotated_filename, annotated_frame)
+    # Create supervision annotators
+    annotated_frame = bounding_box_annotator.annotate(scene=frame, detections=detections)
+    annotated_frame = label_annotator.annotate(scene=annotated_frame, detections=detections)
 
+    # Generate a unique filename for the annotated image
+    rand = random.randint(1000, 9999)
+    annotated_filename = f"{annotated_img_path}/annotated_image_{class_name}_{rand}.jpg"
+    
+    # Save the annotated image
+    cv2.imwrite(annotated_filename, annotated_frame)
 
-        # print("detections:", detections)
-        # print("image:",image_id)
-
-        ## Week 9 ## 
-        # We don't need to pass in the signal anymore
-        # image_id = predict_image_week_9(filename,model)
-
-        # Return the obstacle_id and image_id
-        result = {
-            "obstacle_id": obstacle_id,
-            "image_id": image_id
-        }
+    # Return the obstacle_id and image_id
+    result = {
+        "obstacle_id": obstacle_id,
+        "image_id": image_id
+    }
     return jsonify(result)

@@ -13,3 +13,4 @@ test.csv
 __pycache__/
 /simulator/node_modules/
 .env
+.jpg
