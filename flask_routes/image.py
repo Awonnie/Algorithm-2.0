@@ -1,12 +1,13 @@
-# Third Party Imports
-# Built-in Imports
-import os
 
 import cv2
 import supervision as sv
 from flask import Blueprint, jsonify, request
 from inference import get_roboflow_model
+
 import random
+import os
+
+from .helper import clear_images, setup_img_folders
 
 # Local Imports
 from consts import CV_API_KEY, MODEL_ID
@@ -25,14 +26,19 @@ def image_predict():
     print(f"Request: {request.files}")
     file = request.files['file']
     filename = file.filename
-    file.save(os.path.join('uploads', filename))
+
+    # Initialise folders
+    setup_img_folders()
+    clear_images()
+
+    file.save(os.path.join('images', filename))
     # filename format: "<timestamp>_<obstacle_id>_<signal>.jpeg"
     constituents = file.filename.split("_")
     # print ("Constituents: ", constituents)
     obstacle_id = constituents[1]
 
     # print(f"file: {file}")
-    frame = cv2.imread(os.path.join('uploads', filename))  
+    frame = cv2.imread(os.path.join('images', filename))  
 
     if frame is None:
         print("Failed to load image")

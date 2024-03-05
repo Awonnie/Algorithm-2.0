@@ -7,16 +7,16 @@ import time
 
 def stitch_image():
     """
-    Stitches the images in the folder together and saves it into runs/stitched folder
+    Stitches the images in the folder together and saves it into images/stitched folder
     """
-    # Initialize path to save stitched image
-    imgFolder = 'uploads'
-    stitchedPath = os.path.join(imgFolder, f'stitched-{int(time.time())}.jpg') #changed fim jpeg to jpg
+    # Initialize paths
+    img_folder = 'images'
+    img_path = glob.glob(os.path.join(img_folder, "*.jpg"))
+    stitched_img_folder = "images/stitched"
+    stitched_path = os.path.join(img_folder, f'stitched-{int(time.time())}.jpg') #changed fim jpeg to jpg
 
-    # Find all files that ends with ".jpg" (this won't match the stitched images as we name them ".jpeg")
-    imgPaths = glob.glob(os.path.join(imgFolder, "*.jpg"))
     # Open all images
-    images = [Image.open(x) for x in imgPaths]
+    images = [Image.open(x) for x in img_path]
     # Get the width and height of each image
     width, height = zip(*(i.size for i in images))
     # Calculate the total width and max height of the stitched image, as we are stitching horizontally
@@ -30,22 +30,22 @@ def stitch_image():
         stitchedImg.paste(im, (x_offset, 0))
         x_offset += im.size[0]
     # Save the stitched image to the path
-    stitchedImg.save(stitchedPath)
+    stitchedImg.save(stitched_path)
 
     # Move original images to "originals" subdirectory
-    for img in imgPaths:
+    for img in img_path:
         shutil.move(img, os.path.join(
-            "uploads", "originals", os.path.basename(img)))
+            "images", "raw", os.path.basename(img)))
 
     return stitchedImg
 
 def stitch_image_own():
     """
-    Stitches the images in the folder together and saves it into own_results folder
+    Stitches the images in the folder together and saves it into stitched folder
 
     Basically similar to stitch_image() but with different folder names and slightly different drawing of bounding boxes and text
     """
-    imgFolder = 'own_results'
+    imgFolder = 'stitched'
     stitchedPath = os.path.join(imgFolder, f'stitched-{int(time.time())}.jpeg')
 
     imgPaths = glob.glob(os.path.join(imgFolder+"/annotated_image_*.jpg"))
@@ -66,3 +66,22 @@ def stitch_image_own():
     stitchedImg.save(stitchedPath)
 
     return stitchedImg
+
+def clear_images():
+    for filename in os.listdir('images/raw'):
+        if filename.endswith(".jpg"):
+            file_path = os.path.join('images/raw',filename)
+            os.remove(file_path)
+
+    for filename in os.listdir('images/stitched'):
+        if filename.endswith(".jpg"):
+            file_path = os.path.join('images/stitched',filename)
+            os.remove(file_path)
+
+
+def setup_img_folders():
+    try:
+        os.makedirs('images/raw', exist_ok=True)
+        os.makedirs('images/stitched', exist_ok=True)
+    except OSError as error:
+        print("Directory can't be created")

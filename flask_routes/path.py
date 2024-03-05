@@ -1,6 +1,3 @@
-# Third Party Imports
-import os
-# Built-in Imports
 import time
 
 from flask import Blueprint, jsonify, request
@@ -9,6 +6,7 @@ from flask import Blueprint, jsonify, request
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
 from path_finding import PathFinder, command_generator, coordinate_cal
+from .helper import setup_img_folders
 
 path = Blueprint('path', __name__)
 
@@ -97,21 +95,6 @@ def path_finder():
     # print(f"Path Execution Time: {path_execution_time}")
     print(f"Commands: {commands}")
     # print(f"Duration:{total_duration}")
-
-    for filename in os.listdir('own_results'):
-        if filename.endswith(".jpg"):
-            file_path = os.path.join('own_results',filename)
-            os.remove(file_path)
-
-    for filename in os.listdir('uploads'):
-        if filename.endswith(".jpg"):
-            file_path = os.path.join('uploads',filename)
-            os.remove(file_path)
-
-    for filename in os.listdir('uploads/originals'):
-        if filename.endswith(".jpg"):
-            file_path = os.path.join('uploads/originals',filename)
-            os.remove(file_path)
     
     return jsonify({
         "data": {
