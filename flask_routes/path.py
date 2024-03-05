@@ -90,14 +90,14 @@ def path_finder():
             ) / ROBOT_SPEED)
         
     path_execution_time.insert(0,0) 
-    print(f"Final Path: ")
-    for path in optimal_path:
-        print(f"{(path.x, path.y, path.direction)}")
-    # print(f"Path: {path_results}")
-    # print(f"Path Execution Time: {path_execution_time}")
-    # print(f"Commands: {commands}")
-    # print(f"Duration:{total_duration}")
-    
+
+    # print("Commands:")    
+    # for command in commands:
+    #     if command.startswith("SNAP"):
+    #         print(command)
+    #     else:
+    #         print(command, end=" ")
+        
     return jsonify({
         "data": {
             'distance': total_distance,
