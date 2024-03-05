@@ -84,7 +84,7 @@ class Arena:
                 continue
             
             # Must be at least 4 units away in total (x+y)
-            if abs(ob.x - x) + abs(ob.y - y) >= 4:
+            if abs(ob.x - x) + abs(ob.y - y) >= VIRTUAL_CELLS:
                 continue
 
             # If max(x,y) is less than 3 units away, consider not reachable

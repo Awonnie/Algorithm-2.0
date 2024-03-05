@@ -417,8 +417,8 @@ class PathFinder:
 
             dist_between = self.__compute_distance_between(start, end)
 
-            # If it is already done before or start and end are viewing positions, return
-            if (start, end) in self.path_table or dist_between == 1:
+            # If it is already done before, return
+            if (start, end) in self.path_table:
                 return
 
             # Heuristic to guide the search: 'distance' is calculated by f = g + h
@@ -459,8 +459,10 @@ class PathFinder:
 
                     # new cost is calculated by the cost to reach current state + cost to move from
                     # current state to new state + heuristic cost from new state to end state
-                    next_cost = cur_distance + move_cost + \
-                                self.__compute_distance_between(x1 = next_x, y1 = next_y, x2 = end.x, y2 = end.y)
+                    next_cost = \
+                        cur_distance + \
+                        move_cost + \
+                        self.__compute_distance_between(x1 = next_x, y1 = next_y, x2 = end.x, y2 = end.y)
 
                     if (next_x, next_y, new_direction) not in g_distance or \
                             g_distance[(next_x, next_y, new_direction)] > cur_distance + move_cost:
