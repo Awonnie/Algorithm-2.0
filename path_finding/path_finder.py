@@ -9,9 +9,6 @@ from direction import Direction
 from arena_objects import GridCell
 from consts import TURN_FACTOR, ITERATIONS, TURN_RADIUS, SAFE_COST
 
-turn_wrt_big_turns = [[3 * TURN_RADIUS, TURN_RADIUS],
-                  [4 * TURN_RADIUS, 2 * TURN_RADIUS]]
-
 movement_directions = [
     (1, 0, Direction.EAST),
     (-1, 0, Direction.WEST),
@@ -37,7 +34,7 @@ class PathFinder:
         else:
             self.big_turn = int(big_turn)
 
-    def __rotation_cost(self, d1, d2):
+    def __calc_rotation_cost(self, d1, d2):
         diff = abs(d1 - d2)
         return min(diff, 8 - diff)
 
@@ -219,7 +216,7 @@ class PathFinder:
 
         return 0
 
-    def __get_neighbors(self, x, y, direction):  # TODO: see the behavior of the robot and adjust...
+    def __get_neighbors(self, x, y, orientation):  # TODO: see the behavior of the robot and adjust...
         """
         Return a list of tuples with format:
         newX, newY, new_direction
@@ -234,108 +231,148 @@ class PathFinder:
 
         neighbors = []
         # Assume that after following this direction, the car direction is EXACTLY md
-        for dx, dy, md in movement_directions:
-            if md == direction:  # if the new direction == md
+        for dx, dy, new_orientation in movement_directions:
+            if new_orientation == orientation:  # if the new direction == md
                 # Check for valid position
                 if self.arena.is_reachable(x + dx, y + dy):  # Move Foward;
                     # Get safe cost of destination
                     safe_cost = self.__get_safe_cost(x + dx, y + dy)
-                    neighbors.append((x + dx, y + dy, md, safe_cost))
+                    neighbors.append((x + dx, y + dy, new_orientation, safe_cost))
                 # Check for valid position
                 if self.arena.is_reachable(x - dx, y - dy):  # Move Backward;
                     # Get safe cost of destination
                     safe_cost = self.__get_safe_cost(x - dx, y - dy)
-                    neighbors.append((x - dx, y - dy, md, safe_cost))
+                    neighbors.append((x - dx, y - dy, new_orientation, safe_cost))
 
             else:  # consider 8 cases
                 
                 # Turning displacement is either 4-2 or 3-1
-                bigger_change = turn_wrt_big_turns[self.big_turn][0]
-                smaller_change = turn_wrt_big_turns[self.big_turn][1]
+                bigger_change = max(TURN_RADIUS)
+                smaller_change = min(TURN_RADIUS)
 
-                # Facing NORTH -> Turning EAST
-                if direction == Direction.NORTH and md == Direction.EAST and self.arena.is_reachable(x, y, preTurn = True):
+                # Facing NORTH -> Facing EAST
+                if orientation == Direction.NORTH and new_orientation == Direction.EAST and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x + bigger_change
+                    forward_y = y + smaller_change
+                    reverse_x = x - bigger_change
+                    reverse_y = y - smaller_change
+
                     # Check for valid position
-                    if self.arena.is_reachable(x + bigger_change, y + smaller_change, turn = True):
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
                         # Get safe cost of destination
-                        safe_cost = self.__get_safe_cost(x + bigger_change, y + smaller_change)
-                        neighbors.append((x + bigger_change, y + smaller_change, md, safe_cost + 10))
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                     # Check for valid position
-                    if self.arena.is_reachable(x - smaller_change, y - bigger_change, turn = True):
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
                         # Get safe cost of destination
-                        safe_cost = self.__get_safe_cost(x - smaller_change, y - bigger_change)
-                        neighbors.append((x - smaller_change, y - bigger_change, md, safe_cost + 10))
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
-                # Facing EAST -> Turning NORTH
-                if direction == Direction.EAST and md == Direction.NORTH and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x + smaller_change, y + bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + smaller_change, y + bigger_change)
-                        neighbors.append((x + smaller_change, y + bigger_change, md, safe_cost + 10))
+                # Facing EAST -> Facing NORTH
+                if orientation == Direction.EAST and new_orientation == Direction.NORTH and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x + smaller_change
+                    forward_y = y + bigger_change
+                    reverse_x = x - smaller_change
+                    reverse_y = y - bigger_change
 
-                    if self.arena.is_reachable(x - bigger_change, y - smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - bigger_change, y - smaller_change)
-                        neighbors.append((x - bigger_change, y - smaller_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
-                # Facing EAST -> Turning SOUTH
-                if direction == Direction.EAST and md == Direction.SOUTH and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x + smaller_change, y - bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + smaller_change, y - bigger_change)
-                        neighbors.append((x + smaller_change, y - bigger_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
-                    if self.arena.is_reachable(x - bigger_change, y + smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - bigger_change, y + smaller_change)
-                        neighbors.append((x - bigger_change, y + smaller_change, md, safe_cost + 10))
+                # Facing EAST -> Facing SOUTH
+                if orientation == Direction.EAST and new_orientation == Direction.SOUTH and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x + smaller_change
+                    forward_y = y - bigger_change
+                    reverse_x = x - smaller_change
+                    reverse_y = y + bigger_change
 
-                # Facing SOUTH -> Turning EAST
-                if direction == Direction.SOUTH and md == Direction.EAST and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x + bigger_change, y - smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + bigger_change, y - smaller_change)
-                        neighbors.append((x + bigger_change, y - smaller_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
-                    if self.arena.is_reachable(x - smaller_change, y + bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - smaller_change, y + bigger_change)
-                        neighbors.append((x - smaller_change, y + bigger_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
-                # Facing SOUTH -> Turning WEST
-                if direction == Direction.SOUTH and md == Direction.WEST and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x - bigger_change, y - smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - bigger_change, y - smaller_change)
-                        neighbors.append((x - bigger_change, y - smaller_change, md, safe_cost + 10))
+                # Facing SOUTH -> Facing EAST
+                if orientation == Direction.SOUTH and new_orientation == Direction.EAST and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x + bigger_change
+                    forward_y = y - smaller_change
+                    reverse_x = x - bigger_change
+                    reverse_y = y + smaller_change
 
-                    if self.arena.is_reachable(x + smaller_change, y + bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + smaller_change, y + bigger_change)
-                        neighbors.append((x + smaller_change, y + bigger_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
-                # Facing WEST -> Turning SOUTH
-                if direction == Direction.WEST and md == Direction.SOUTH and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x - smaller_change, y - bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - smaller_change, y - bigger_change)
-                        neighbors.append((x - smaller_change, y - bigger_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
-                    if self.arena.is_reachable(x + bigger_change, y + smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + bigger_change, y + smaller_change)
-                        neighbors.append((x + bigger_change, y + smaller_change, md, safe_cost + 10))
+                # Facing SOUTH -> Facing WEST
+                if orientation == Direction.SOUTH and new_orientation == Direction.WEST and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x - bigger_change
+                    forward_y = y - smaller_change
+                    reverse_x = x + bigger_change
+                    reverse_y = y + smaller_change
 
-                # Facing WEST -> Turning NORTH
-                if direction == Direction.WEST and md == Direction.NORTH and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x - smaller_change, y + bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - smaller_change, y + bigger_change)
-                        neighbors.append((x - smaller_change, y + bigger_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
-                    if self.arena.is_reachable(x + bigger_change, y - smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + bigger_change, y - smaller_change)
-                        neighbors.append((x + bigger_change, y - smaller_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
-                # Facing NORTH -> Turning WEST
-                if direction == Direction.NORTH and md == Direction.WEST and self.arena.is_reachable(x, y, preTurn = True):
-                    if self.arena.is_reachable(x + smaller_change, y - bigger_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x + smaller_change, y - bigger_change)
-                        neighbors.append((x + smaller_change, y - bigger_change, md, safe_cost + 10))
+                # Facing WEST -> Facing SOUTH
+                if orientation == Direction.WEST and new_orientation == Direction.SOUTH and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x - smaller_change
+                    forward_y = y - bigger_change
+                    reverse_x = x + smaller_change
+                    reverse_y = y + bigger_change
 
-                    if self.arena.is_reachable(x - bigger_change, y + smaller_change, turn = True):
-                        safe_cost = self.__get_safe_cost(x - bigger_change, y + smaller_change)
-                        neighbors.append((x - bigger_change, y + smaller_change, md, safe_cost + 10))
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
+
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
+
+                # Facing WEST -> Facing NORTH
+                if orientation == Direction.WEST and new_orientation == Direction.NORTH and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x - smaller_change
+                    forward_y = y + bigger_change
+                    reverse_x = x + smaller_change
+                    reverse_y = y - bigger_change
+
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
+
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
+
+                # Facing NORTH -> Facing WEST
+                if orientation == Direction.NORTH and new_orientation == Direction.WEST and self.arena.is_reachable(x, y, preTurn = True):
+                    forward_x = x - bigger_change
+                    forward_y = y + smaller_change
+                    reverse_x = x + bigger_change
+                    reverse_y = y - smaller_change
+
+                    if self.arena.is_reachable(forward_x, forward_y, turn = True):
+                        safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                        neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
+
+                    if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                        neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
 
         return neighbors
 
@@ -402,7 +439,7 @@ class PathFinder:
                     if (next_x, next_y, new_direction) in visited:
                         continue
 
-                    move_cost = self.__rotation_cost(new_direction, cur_direction) * TURN_FACTOR + 1 + safe_cost
+                    move_cost = self.__calc_rotation_cost(new_direction, cur_direction) * TURN_FACTOR + 1 + safe_cost
 
                     # the cost to check if any obstacles that considered too near the robot; if it
                     # safe_cost =
@@ -420,7 +457,6 @@ class PathFinder:
                         heapq.heappush(heap, (next_cost, next_x, next_y, new_direction))
 
         # Nested loop through all the state pairings
-        print(f"States: {states}")
         for i in range(len(states) - 1):
             for j in range(i + 1, len(states)):
                 __astar_search(states[i], states[j])
