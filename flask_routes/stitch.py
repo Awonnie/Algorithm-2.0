@@ -14,10 +14,10 @@ def stitch_images():
     """
 
     # Call Stitiching method here
-    img = stitch_raw_imgs()
-    img.show()
-    img2 = stitch_annotated_imgs()
-    img2.show()
+    stitched_raw = stitch_raw_imgs()
+    stitched_raw.show()
+    stitched_annotated = stitch_annotated_imgs()
+    stitched_annotated.show()
 
     # Return okay response
     return jsonify({"result": "ok"})

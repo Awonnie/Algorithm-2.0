@@ -1,7 +1,6 @@
 from PIL import Image
 import glob
 import os
-import shutil
 import time
 
 
