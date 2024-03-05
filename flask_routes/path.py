@@ -89,11 +89,13 @@ def path_finder():
             x2 = path_results[i+1].get('x'), y2 = path_results[i+1].get('y')
             ) / ROBOT_SPEED)
         
-    path_execution_time.insert(0,0)
-
+    path_execution_time.insert(0,0) 
+    print(f"Final Path: ")
+    for path in optimal_path:
+        print(f"{(path.x, path.y, path.direction)}")
     # print(f"Path: {path_results}")
     # print(f"Path Execution Time: {path_execution_time}")
-    print(f"Commands: {commands}")
+    # print(f"Commands: {commands}")
     # print(f"Duration:{total_duration}")
     
     return jsonify({

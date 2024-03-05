@@ -408,12 +408,17 @@ class PathFinder:
             # Update path table for the (start,end) and (end,start) edges, with the (start,end) edge being the reversed path
             self.path_table[(start, end)] = path[::-1]
             self.path_table[(end, start)] = path
+            # print(f"Path From {(start.x, start.y)} to {(end.x, end.y)}:")
+            # path.reverse()
+            # for p in path:
+            #     print(f"{(p[0], p[1], p[2])}")
 
         def __astar_search(start: GridCell, end: GridCell):
-            # astar search algo with three states: x, y, direction
 
-            # If it is already done before, return
-            if (start, end) in self.path_table:
+            dist_between = self.__compute_distance_between(start, end)
+
+            # If it is already done before or start and end are viewing positions, return
+            if (start, end) in self.path_table or dist_between == 1:
                 return
 
             # Heuristic to guide the search: 'distance' is calculated by f = g + h
@@ -423,7 +428,7 @@ class PathFinder:
 
             # format of each item in heap: (f_distance of node, x coord of node, y coord of node)
             # heap in Python is a min-heap
-            heap = [(self.__compute_distance_between(start, end), start.x, start.y, start.direction)]
+            heap = [(dist_between, start.x, start.y, start.direction)]
             parent = dict()
             visited = set()
 
@@ -463,7 +468,7 @@ class PathFinder:
                         parent[(next_x, next_y, new_direction)] = (cur_x, cur_y, cur_direction)
 
                         heapq.heappush(heap, (next_cost, next_x, next_y, new_direction))
-
+                
         # Nested loop through all the state pairings
         for i in range(len(states) - 1):
             for j in range(i + 1, len(states)):

@@ -40,28 +40,28 @@ class Obstacle(GridCell):
 
 
         # If the image is facing NORTH, robot has to be facing SOUTH
-        if self.direction==Direction.NORTH:
+        if self.direction == Direction.NORTH:
             center_viewing_coord = (self.x, self.y + extra_cells)
             left_viewing_coord = (self.x + 1, self.y + extra_cells)
             right_viewing_coord = (self.x - 1, self.y + extra_cells)
             robot_direction = Direction.SOUTH
 
         # If the image is facing SOUTH, robot has to be facing NORTH
-        elif self.direction==Direction.SOUTH:
+        elif self.direction == Direction.SOUTH:
             center_viewing_coord = (self.x, self.y - extra_cells)
             left_viewing_coord = (self.x - 1, self.y - extra_cells)
             right_viewing_coord = (self.x + 1, self.y - extra_cells)
             robot_direction = Direction.NORTH
 
         # If the image is facing WEST, robot has to be facing EAST
-        elif self.direction==Direction.WEST:
+        elif self.direction == Direction.WEST:
             center_viewing_coord = (self.x - extra_cells, self.y)
             left_viewing_coord = (self.x - extra_cells, self.y + 1)
             right_viewing_coord = (self.x - extra_cells, self.y - 1)
             robot_direction = Direction.EAST
 
         # If the image is facing EAST, robot has to be facing WEST
-        elif self.direction== Direction.EAST:
+        elif self.direction == Direction.EAST:
             center_viewing_coord = (self.x + extra_cells, self.y)
             left_viewing_coord = (self.x + extra_cells, self.y - 1)
             right_viewing_coord = (self.x + extra_cells, self.y + 1)

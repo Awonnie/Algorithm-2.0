@@ -7,7 +7,7 @@ load_dotenv()
 Robot Constants
 '''
 TURN_FACTOR = 1
-TURN_RADIUS = (3,1) # Turning radius by coordinates: 3x1 units
+TURN_RADIUS = (2,1) # Turning radius by coordinates: 3x1 units
 ROBOT_SPEED =  2 # measured as cells/seconds, in other words, it can reach X amount of cells (1 cell = 10cm) within 1 timestep
 
 '''
