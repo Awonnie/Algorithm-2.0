@@ -45,38 +45,13 @@ def path_finder():
     
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
-    
-    # Process each command individually and append the location the robot should be after executing that command to path_results
-    i = 0
-    path_results = [optimal_path[0].get_dict()] # Get the starting location and add it to path_results
-    for command in commands:
-        path_results, i = coordinate_cal(path_results, command, i)
 
     # Used to store the estimated duration in seconds for running each command
+    path_results = []
+    for path in optimal_path:
+        path_results.append(path.get_dict())
+
     path_execution_time = []
-
-    # Process each command individually and append the location the robot should be after executing that command to path_results
-    total_duration = 0
-    for command in commands:
-        command_duration = 0
-        movement = 0
-
-        if command.startswith("FIN"):
-            continue
-
-        if command.startswith("SNAP"):
-            command_duration = 1
-            continue
-
-        elif command.startswith("FW") or command.startswith("BW"):
-            movement = int(command[2:]) // 10
-            command_duration = movement / ROBOT_SPEED
-
-        else:   # This covers all rotation movements
-            command_duration = 3
-        
-        total_duration += command_duration
-
     for i in range(len(path_results)):
         if (i+1) == len(path_results): 
             break
@@ -90,13 +65,18 @@ def path_finder():
             ) / ROBOT_SPEED)
         
     path_execution_time.insert(0,0) 
+    total_duration = sum(path_execution_time)
 
-    # print("Commands:")    
-    # for command in commands:
-    #     if command.startswith("SNAP"):
-    #         print(command)
-    #     else:
-    #         print(command, end=" ")
+    print("Commands:")    
+    for command in commands:
+        if command.startswith("SNAP"):
+            print(command)
+        else:
+            print(command, end=" ")
+
+    print(f"Optimal Path: {optimal_path}")
+
+    
         
     return jsonify({
         "data": {
