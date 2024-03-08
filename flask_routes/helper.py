@@ -77,7 +77,7 @@ def clear_images():
             os.remove(file_path)
 
     for filename in os.listdir('images/stitched'):
-        if filename.endswith(".jpg"):
+        if filename.startswith("stitched"):
             file_path = os.path.join('images/stitched',filename)
             os.remove(file_path)
 
@@ -88,4 +88,4 @@ def setup_img_folders():
         os.makedirs('images/annotated', exist_ok=True)
         os.makedirs('images/stitched', exist_ok=True)
     except OSError as error:
-        print("Directory can't be created")
+        print(error)
