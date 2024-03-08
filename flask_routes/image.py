@@ -7,7 +7,6 @@ from inference import get_roboflow_model
 import random
 import os
 
-from .helper import clear_images, setup_img_folders
 
 # Local Imports
 from consts import CV_API_KEY, MODEL_ID
@@ -30,9 +29,7 @@ def image_predict():
     file = request.files['file']
     filename = file.filename
 
-    # Initialise folders
-    setup_img_folders()
-    clear_images()
+   
 
     raw_img_path = 'images/raw'
     annotated_img_path = 'images/annotated'
@@ -56,6 +53,13 @@ def image_predict():
                                 confidence = 0.5,
                                 iou_threshold=0.5)
     detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+
+    print(f"DETECTIONS: {detections}")
+    if not detections.data:
+        return jsonify({
+            "obstacle_id": 1,
+            "image_id": 23
+        })
 
     class_name = detections.data['class_name'][0]
     image_id = int(class_name[2:])

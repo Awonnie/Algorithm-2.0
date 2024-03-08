@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
 from path_finding import PathFinder, command_generator, coordinate_cal
-from .helper import setup_img_folders
+from .helper import clear_images, setup_img_folders
 
 path = Blueprint('path', __name__)
 
@@ -20,6 +20,8 @@ def path_finder():
     """
     # Get the json data from the request
     content = request.json
+
+    print(f"Content: {content}")
 
     # Get the obstacles, big_turn, retrying, robot_x, robot_y, and robot_direction from the json data
     obstacles = content['obstacles']
@@ -45,6 +47,10 @@ def path_finder():
     
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
+
+     # Initialise folders
+    setup_img_folders()
+    clear_images()
 
     # Used to store the estimated duration in seconds for running each command
     path_results = []
@@ -73,10 +79,6 @@ def path_finder():
             print(command)
         else:
             print(command, end=" ")
-
-    print(f"Optimal Path: {optimal_path}")
-
-    
         
     return jsonify({
         "data": {
