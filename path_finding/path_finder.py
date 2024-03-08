@@ -108,7 +108,6 @@ class PathFinder:
         all_view_positions = self.arena.get_viewing_positions(retrying)
 
         for op in self.__get_binary_strings(len(all_view_positions)):
-            # print(f"op is: {op}")
             # op is binary string of length len(all_view_positions) == len(obstacles)
             # If index == 1 means the view_positions[index] is selected to visit, otherwise drop
 
@@ -216,7 +215,7 @@ class PathFinder:
 
         return 0
 
-    def __get_neighbors(self, x, y, orientation):  # TODO: see the behavior of the robot and adjust...
+    def __get_neighbors(self, x, y, orientation, strict=True):  # TODO: see the behavior of the robot and adjust...
         """
         Return a list of tuples with format:
         newX, newY, new_direction
@@ -269,16 +268,14 @@ class PathFinder:
 
                         # Corresponding Command: BL00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x, y+1, turn = False):
+                            if self.arena.is_reachable(x, y+1):
                                 # Get safe cost of destination
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 # Get safe cost of destination + additionally cost for unreachable intermediate (+5)
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
-
-
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
                     # Facing NORTH -> Facing WEST
                     if new_orientation == Direction.WEST:
@@ -294,12 +291,12 @@ class PathFinder:
 
                         # Corresponding Command: BR00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x, y + 1, turn = False):
+                            if self.arena.is_reachable(x, y + 1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
 
                 elif orientation == Direction.EAST:
@@ -317,12 +314,12 @@ class PathFinder:
 
                         # Corresponding Command: BR00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x+1, y, turn = False):
+                            if self.arena.is_reachable(x+1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
 
                     # Facing EAST -> Facing SOUTH
@@ -339,12 +336,12 @@ class PathFinder:
 
                         # Corresponding Command: BL00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x + 1, y , turn = False):
+                            if self.arena.is_reachable(x + 1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
 
                 elif orientation == Direction.SOUTH:
@@ -362,12 +359,12 @@ class PathFinder:
 
                         # Corresponding Command: BR00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable( x , y - 1, turn = False):
+                            if self.arena.is_reachable( x , y - 1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
 
                     # Facing SOUTH -> Facing WEST
@@ -384,12 +381,12 @@ class PathFinder:
 
                         # Corresponding Command: BL00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x, y-1, turn = False):
+                            if self.arena.is_reachable(x, y-1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
 
                 elif orientation == Direction.WEST:
                     # Facing WEST -> Facing SOUTH
@@ -406,30 +403,33 @@ class PathFinder:
 
                         # Corresponding Command: BR00
                         if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x-1, y, turn = False):
-                                safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
-
-                    # Facing WEST -> Facing NORTH
-                    if new_orientation == Direction.NORTH:
-                        forward_x = x - smaller_change
-                        forward_y = y + bigger_change
-                        reverse_x = x + smaller_change
-                        reverse_y = y - bigger_change
-
-                        # Corresponding Command: FR00
-                        if self.arena.is_reachable(forward_x, forward_y+1, turn = True):
-                            safe_cost = self.__get_safe_cost(forward_x, forward_y)
-                            neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
-
-                        # Corresponding Command: BL00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
-                            if self.arena.is_reachable(x-1, y, turn = False):
+                            if self.arena.is_reachable(x-1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
-                            else:
+                            elif strict == False:
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
-                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10 + 5))
+                                neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
+
+                        # Facing WEST -> Facing NORTH
+                        if new_orientation == Direction.NORTH:
+                            forward_x = x - smaller_change
+                            forward_y = y + bigger_change
+                            reverse_x = x + smaller_change
+                            reverse_y = y - bigger_change
+
+                            # Corresponding Command: FR00
+                            if self.arena.is_reachable(forward_x, forward_y+1, turn = True):
+                                safe_cost = self.__get_safe_cost(forward_x, forward_y)
+                                neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
+
+                            # Corresponding Command: BL00
+                            if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                                if self.arena.is_reachable(x-1, y):
+                                    safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                                    neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
+                                elif strict == False:
+                                    safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
+                                    neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 20))
         return neighbors
 
     def __path_cost_generator(self, states: List[GridCell]):
@@ -456,10 +456,6 @@ class PathFinder:
             # Update path table for the (start,end) and (end,start) edges, with the (start,end) edge being the reversed path
             self.path_table[(start, end)] = path[::-1]
             self.path_table[(end, start)] = path
-            # print(f"Path From {(start.x, start.y)} to {(end.x, end.y)}:")
-            # path.reverse()
-            # for p in path:
-            #     print(f"{(p[0], p[1], p[2])}")
 
         def __astar_search(start: GridCell, end: GridCell):
 
