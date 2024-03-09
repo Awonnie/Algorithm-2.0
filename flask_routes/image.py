@@ -58,8 +58,11 @@ def image_predict():
             "image_id": 23
         })
 
-    class_name = detections.data['class_name'][0]
-    image_id = int(class_name[2:])
+    # DEBUGGING PRINT STATEMENTS
+    print("Detected image:", detections.data)
+
+    image_data = detections.data['class_name'][0]
+    image_id = int(image_data[2:])
 
     # Create supervision annotators
     bounding_box_annotator = sv.BoundingBoxAnnotator()
@@ -71,7 +74,7 @@ def image_predict():
 
     # Generate a unique filename for the annotated image
     rand = random.randint(1000, 9999)
-    annotated_filename = f"{annotated_img_path}/annotated_image_{class_name}_{rand}.jpg"
+    annotated_filename = f"{annotated_img_path}/annotated_image_{image_data}_{rand}.jpg"
     
     try:
         # Save the annotated image
