@@ -111,24 +111,16 @@ class PathFinder:
             # op is binary string of length len(all_view_positions) == len(obstacles)
             # If index == 1 means the view_positions[index] is selected to visit, otherwise drop
 
-            # Calculate optimal_cost table
-
             # Initialize `items` to be a list containing the robot's start state as the first item
             items = [self.robot.get_robot_cell()]
             # Initialize `cur_view_positions` to be an empty list
             cur_view_positions = []
             
-            # For each obstacle
-            # print(f"all_view_positions: {all_view_positions}")
             for idx in range(len(all_view_positions)):
-                # If robot is visiting
                 if op[idx] == '1':
-                    # Add possible cells to `items`
                     items = items + all_view_positions[idx]
-                    # Add possible cells to `cur_view_positions`
                     cur_view_positions.append(all_view_positions[idx])
 
-            # Generate the path cost for the items
             self.__path_cost_generator(items)
             combination = []
             self.__generate_combination(cur_view_positions, 0, [], combination, [ITERATIONS])
@@ -156,7 +148,6 @@ class PathFinder:
                         cost_np[e][s] = cost_np[s][e]
                 cost_np[:, 0] = 0
                 _permutation, _distance = solve_tsp_dynamic_programming(cost_np)
-                # print(f"permutations: {_permutation}")
                 if _distance + fixed_cost >= total_distance:
                     continue
 

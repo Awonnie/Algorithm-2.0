@@ -21,13 +21,17 @@ def path_finder():
     # Get the json data from the request
     content = request.json
 
-    print(f"Content: {content}")
 
     # Get the obstacles, big_turn, retrying, robot_x, robot_y, and robot_direction from the json data
     obstacles = content['obstacles']
     retrying = content['retrying']
     robot_x, robot_y = content['robot_x'], content['robot_y']
     robot_direction = int(content['robot_dir'])
+
+    # DEBUGGING PRINT STATEMENTS
+    print("Obstacles received:")
+    for ob in obstacles:
+        print(f"{ob['id']}: {(ob['x'], ob['y'], ob['d'])}")
 
     # Initialize the Arena, Robot and Obstacles
     robot = Robot(robot_x, robot_y, robot_direction)
@@ -39,16 +43,15 @@ def path_finder():
     # Creates the PathFinder object
     path_finder = PathFinder(arena, big_turn=None)
 
-    search_start_time = time.time()
     # Get shortest path
+    search_start_time = time.perf_counter()
     optimal_path, total_distance = path_finder.get_shortest_path(retrying=retrying)
-    print(f"Time taken to find shortest path using A* search: {time.time() - search_start_time}s")
-    print(f"Distance to travel: {total_distance} units")
+    search_end_time = time.perf_counter()
     
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
 
-     # Initialise folders
+    # Initialise folders to prepare for SNAP commands
     setup_img_folders()
     clear_images()
 
@@ -73,6 +76,9 @@ def path_finder():
     path_execution_time.insert(0,0) 
     total_duration = sum(path_execution_time)
 
+    # DEBUGGING PRINT STATEMENTS
+    print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.4f}s")
+    print(f"Distance to travel: {total_distance} units")
     print("Commands:")    
     for command in commands:
         if command.startswith("SNAP"):
