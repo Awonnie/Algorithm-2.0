@@ -1,6 +1,5 @@
 from consts import GRID_HEIGHT, GRID_WIDTH
 from direction import Direction
-from arena_objects import Robot
 
 def coordinate_cal(path_results, command, i):
     # if command is snap
@@ -102,15 +101,21 @@ def command_generator(robot_path, obstacles):
     Returns
     -------
     commands: list of commands for the robot to follow
-    extended_path: list of Robot State objects that includes grids for turning (Used in the Simulation)
     """
 
     # Convert the list of obstacles into a dictionary with key as the obstacle id and value as the obstacle
     obstacles_dict = {ob['id']: ob for ob in obstacles}
 
+    # print("Robot Path: ")
+    # for path in robot_path:
+    #     print(f"Path: {path}")
+
+    # print("Obstacles: ")
+    # for ob in obstacles:
+    #     print(ob)
+    
     # Initialize commands list
     commands = []
-    extended_path = robot_path[:]
 
     # Iterate through each state in the list of robot_path
     for i in range(1, len(robot_path)):
@@ -136,8 +141,8 @@ def command_generator(robot_path, obstacles):
                 # SOUTH = 4
                 # WEST = 6
 
-                current_ob_dict = obstacles_dict[robot_path[i].screenshot_id] # Format of current_ob_dict -> {'x': 9, 'y': 10, 'd': 6, 'id': 9}
-                current_robot_position = robot_path[i] # Format of current_robot_position {'x': 1, 'y': 8, 'd': <Direction.NORTH: 0>, 's': -1}
+                current_ob_dict = obstacles_dict[robot_path[i].screenshot_id] # {'x': 9, 'y': 10, 'd': 6, 'id': 9}
+                current_robot_position = robot_path[i] # {'x': 1, 'y': 8, 'd': <Direction.NORTH: 0>, 's': -1}
 
                 # Obstacle facing WEST, robot facing EAST
                 if current_ob_dict['d'] == 6 and current_robot_position.direction == 2:
@@ -198,21 +203,17 @@ def command_generator(robot_path, obstacles):
                 # y value increased -> Forward Right
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("FR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FR")
                 # y value decreased -> Backward Left
                 else:
                     commands.append("BL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BR")
             # Facing west afterwards
             elif robot_path[i].direction == Direction.WEST:
                 # y value increased -> Forward Left
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("FL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FR")
                 # y value decreased -> Backward Right
                 else:
                     commands.append("BR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BR")
             else:
                 raise Exception("Invalid turning direction")
 
@@ -220,18 +221,14 @@ def command_generator(robot_path, obstacles):
             if robot_path[i].direction == Direction.NORTH:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("FL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FL")
                 else:
                     commands.append("BR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BR")
 
             elif robot_path[i].direction == Direction.SOUTH:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("BL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BL")
                 else:
                     commands.append("FR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FR")
             else:
                 raise Exception("Invalid turning direction")
 
@@ -239,17 +236,13 @@ def command_generator(robot_path, obstacles):
             if robot_path[i].direction == Direction.EAST:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("BR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BR")
                 else:
                     commands.append("FL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FL")
             elif robot_path[i].direction == Direction.WEST:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("BL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BL")
                 else:
                     commands.append("FR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FR")
             else:
                 raise Exception("Invalid turning direction")
 
@@ -257,17 +250,13 @@ def command_generator(robot_path, obstacles):
             if robot_path[i].direction == Direction.NORTH:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("FR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FR")
                 else:
                     commands.append("BL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BL")
             elif robot_path[i].direction == Direction.SOUTH:
                 if robot_path[i].y > robot_path[i - 1].y:
                     commands.append("BR{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "BR")
                 else:
                     commands.append("FL{}".format(steps))
-                    add_intermediate_path(extended_path, i, robot_path[i-1], "FL")
             else:
                 raise Exception("Invalid turning direction")
         else:
@@ -356,134 +345,3 @@ def command_generator(robot_path, obstacles):
         compressed_commands.append(commands[i])
 
     return compressed_commands
-
-def add_intermediate_path(extended_path, index, pre_turn_position, turn_type):
-    # Inserts the intermediate path for turning based on 8 cases
-    if turn_type == "FR":
-        intermediate_path = get_fr_intermediate_path(pre_turn_position)
-        for path in intermediate_path:
-            extended_path.insert(index, path)
-    elif turn_type == "FL":
-        intermediate_path = get_fl_intermediate_path(pre_turn_position)
-        for path in intermediate_path:
-            extended_path.insert(index, path)
-    elif turn_type == "BR":
-        intermediate_path = get_br_intermediate_path(pre_turn_position)
-        for path in intermediate_path:
-            extended_path.insert(index, path)
-    elif turn_type == "BL":
-        intermediate_path = get_bl_intermediate_path(pre_turn_position)
-        for path in intermediate_path:
-            extended_path.insert(index, path)
-
-def get_fr_intermediate_path(starting_pos):
-    if starting_pos.direction == Direction.NORTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y+1, Direction.NORTH),
-            Robot(starting_pos.x, starting_pos.y+2, Direction.NORTH),
-            Robot(starting_pos.x+1, starting_pos.y+2, Direction.EAST),
-            ])
-    elif starting_pos.direction == Direction.EAST:
-        return reversed([
-            Robot(starting_pos.x+1, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x+2, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x+2, starting_pos.y+1, Direction.SOUTH),
-            ])
-    elif starting_pos.direction == Direction.SOUTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y-1, Direction.SOUTH),
-            Robot(starting_pos.x, starting_pos.y-2, Direction.SOUTH),
-            Robot(starting_pos.x-1, starting_pos.y-2, Direction.WEST),
-            ])
-    elif starting_pos.direction == Direction.WEST:
-        return reversed([
-            Robot(starting_pos.x-1, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y+1, Direction.NORTH),
-            ])
-    else:
-        return []
-    
-def get_fl_intermediate_path(starting_pos):
-    if starting_pos.direction == Direction.NORTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y+1, Direction.NORTH),
-            Robot(starting_pos.x, starting_pos.y+2, Direction.NORTH),
-            Robot(starting_pos.x-1, starting_pos.y+2, Direction.WEST),
-            ])
-    elif starting_pos.direction == Direction.WEST:
-        return reversed([
-            Robot(starting_pos.x-1, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y-1, Direction.SOUTH),
-            ])
-    elif starting_pos.direction == Direction.SOUTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y-1, Direction.SOUTH),
-            Robot(starting_pos.x, starting_pos.y-2, Direction.SOUTH),
-            Robot(starting_pos.x+1, starting_pos.y-2, Direction.EAST),
-            ])
-    elif starting_pos.direction == Direction.EAST:
-        return reversed([
-            Robot(starting_pos.x+1, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x+2, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x+2, starting_pos.y+1, Direction.NORTH),
-            ])
-    else:
-        return []
-    
-def get_br_intermediate_path(starting_pos):
-    if starting_pos.direction == Direction.NORTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y-1, Direction.NORTH),
-            Robot(starting_pos.x, starting_pos.y-2, Direction.NORTH),
-            Robot(starting_pos.x+1, starting_pos.y-2, Direction.WEST),
-            ])
-    elif starting_pos.direction == Direction.WEST:
-        return reversed([
-            Robot(starting_pos.x-1, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x-2, starting_pos.y+1, Direction.SOUTH),
-            ])
-    elif starting_pos.direction == Direction.SOUTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y+1, Direction.SOUTH),
-            Robot(starting_pos.x, starting_pos.y+2, Direction.SOUTH),
-            Robot(starting_pos.x-1, starting_pos.y+2, Direction.EAST),
-            ])
-    elif starting_pos.direction == Direction.EAST:
-        return reversed([
-            Robot(starting_pos.x-1, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x-2, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x-2, starting_pos.y-1, Direction.NORTH),
-            ])
-    else:
-        return []
-    
-def get_bl_intermediate_path(starting_pos):
-    if starting_pos.direction == Direction.NORTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y-1, Direction.NORTH),
-            Robot(starting_pos.x, starting_pos.y-2, Direction.NORTH),
-            Robot(starting_pos.x-1, starting_pos.y-2, Direction.EAST),
-            ])
-    elif starting_pos.direction == Direction.EAST:
-        return reversed([
-            Robot(starting_pos.x-1, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x-2, starting_pos.y, Direction.EAST),
-            Robot(starting_pos.x-2, starting_pos.y+1, Direction.SOUTH),
-            ])
-    elif starting_pos.direction == Direction.SOUTH:
-        return reversed([
-            Robot(starting_pos.x, starting_pos.y+1, Direction.SOUTH),
-            Robot(starting_pos.x, starting_pos.y+2, Direction.SOUTH),
-            Robot(starting_pos.x+1, starting_pos.y+2, Direction.WEST),
-            ])
-    elif starting_pos.direction == Direction.WEST:
-        return reversed([
-            Robot(starting_pos.x+1, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x+2, starting_pos.y, Direction.WEST),
-            Robot(starting_pos.x+2, starting_pos.y-1, Direction.NORTH),
-            ])
-    else:
-        return []
