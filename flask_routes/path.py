@@ -5,8 +5,9 @@ from flask import Blueprint, jsonify, request
 # Local Imports
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
-from path_finding import PathFinder, command_generator, coordinate_cal
-from .helper import clear_images, setup_img_folders
+from path_finding import PathFinder, command_generator
+from .helper import clear_images, setup_img_folders, get_extended_path
+from direction import Direction
 
 path = Blueprint('path', __name__)
 
@@ -31,7 +32,7 @@ def path_finder():
     # DEBUGGING PRINT STATEMENTS
     print("Obstacles received:")
     for ob in obstacles:
-        print(f"{ob['id']}: {(ob['x'], ob['y'], ob['d'])}")
+        print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
 
     # Initialize the Arena, Robot and Obstacles
     robot = Robot(robot_x, robot_y, robot_direction)
@@ -55,10 +56,10 @@ def path_finder():
     setup_img_folders()
     clear_images()
 
-    # Used to store the estimated duration in seconds for running each command
-    path_results = []
-    for path in optimal_path:
-        path_results.append(path.get_dict())
+    path_results = get_extended_path(optimal_path)
+    print("Extended Path:")
+    for path in path_results:
+        print(path)
 
     # DEBUGGING PRINT STATEMENTS
     print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.4f}s")

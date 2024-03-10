@@ -2,6 +2,7 @@ from PIL import Image
 import glob
 import os
 import time
+from direction import Direction
 
 
 def stitch_raw_imgs():
@@ -89,3 +90,147 @@ def setup_img_folders():
         os.makedirs('images/stitched', exist_ok=True)
     except OSError as error:
         print(error)
+
+def get_extended_path(path):
+    extended_path = []
+    for i in range(len(path)):
+
+        extended_path.append(path[i].get_dict())
+
+        if(i+1 == len(path)): 
+            break
+
+        cur_step = path[i]
+        next_step = path[i+1]
+        if cur_step.direction == next_step.direction:
+            continue
+
+        # Add the intermediate steps for different turns
+        x_change = next_step.x - cur_step.x
+        y_change = next_step.y - cur_step.y
+        intermediate_path = []
+        if cur_step.direction == Direction.NORTH and next_step.direction == Direction.EAST:
+            #FR
+            if x_change > 0:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y + 1, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y + 2, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x + 1, 'y':cur_step.y + 2, 'd':Direction.EAST, 's':-1},
+                    ]
+            #BL
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y - 1, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y - 2, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x - 1, 'y':cur_step.y - 2, 'd':Direction.EAST, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.NORTH and next_step.direction == Direction.WEST:
+            #FL
+            if x_change < 0:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y + 1, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y + 2, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x - 1, 'y':cur_step.y + 2, 'd':Direction.WEST, 's':-1},
+                    ]
+            #BR
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y - 1, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y - 2, 'd':Direction.NORTH, 's':-1},
+                    {'x':cur_step.x + 1, 'y':cur_step.y - 2, 'd':Direction.WEST, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.EAST and next_step.direction == Direction.NORTH:
+            #FL
+            if y_change > 0:
+                intermediate_path = [
+                    {'x':cur_step.x + 1, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y + 1, 'd':Direction.NORTH, 's':-1},
+                    ]
+            #BR
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x - 1, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y - 1, 'd':Direction.NORTH, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.EAST and next_step.direction == Direction.SOUTH:
+            #FR
+            if y_change < 0:
+                intermediate_path = [
+                    {'x':cur_step.x + 1, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    ]
+            #BL
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x - 1, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.WEST and next_step.direction == Direction.SOUTH:
+            #FL
+            if y_change < 0:
+                intermediate_path = [
+                    {'x':cur_step.x - 1, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    ]
+            #BR
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x + 1, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y + 1, 'd':Direction.SOUTH, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.WEST and next_step.direction == Direction.NORTH:
+            #FR
+            if y_change > 0:
+                intermediate_path = [
+                    {'x':cur_step.x - 1, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y + 1, 'd':Direction.NORTH, 's':-1},
+                    ]
+            #BL
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x + 1, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y, 'd':Direction.WEST, 's':-1},
+                    {'x':cur_step.x + 2, 'y':cur_step.y - 1, 'd':Direction.NORTH, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.SOUTH and next_step.direction == Direction.EAST:
+            #FL
+            if x_change > 0:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y - 2, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x + 1, 'y':cur_step.y - 2, 'd':Direction.EAST, 's':-1},
+                    ]
+            #BR
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y + 1, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y + 2, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x - 1, 'y':cur_step.y + 2, 'd':Direction.EAST, 's':-1},
+                    ]
+        elif cur_step.direction == Direction.SOUTH and next_step.direction == Direction.WEST:
+            #FR
+            if x_change < 0:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y - 2, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x - 1, 'y':cur_step.y - 2, 'd':Direction.WEST, 's':-1},
+                    ]
+            #BL
+            else:
+                intermediate_path = [
+                    {'x':cur_step.x, 'y':cur_step.y + 1, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x, 'y':cur_step.y + 2, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x + 1, 'y':cur_step.y + 2, 'd':Direction.WEST, 's':-1},
+                ]
+
+        for to_insert in intermediate_path:
+            extended_path.append(to_insert)
+
+    return extended_path
