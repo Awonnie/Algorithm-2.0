@@ -60,22 +60,6 @@ def path_finder():
     for path in optimal_path:
         path_results.append(path.get_dict())
 
-    path_execution_time = []
-    for i in range(len(path_results)):
-        if (i+1) == len(path_results): 
-            break
-
-        if (path_results[i].get('s')==1):
-            path_execution_time.append(2.0)
-
-        path_execution_time.append(path_finder._PathFinder__compute_distance_between(
-            x1 = path_results[i].get('x'), y1 = path_results[i].get('y'),
-            x2 = path_results[i+1].get('x'), y2 = path_results[i+1].get('y')
-            ) / ROBOT_SPEED)
-        
-    path_execution_time.insert(0,0) 
-    total_duration = sum(path_execution_time)
-
     # DEBUGGING PRINT STATEMENTS
     print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.4f}s")
     print(f"Distance to travel: {total_distance} units")
@@ -91,8 +75,7 @@ def path_finder():
             'distance': total_distance,
             'path': path_results,
             'commands': commands,
-            'path_execution_time': path_execution_time,
-            'duration': total_duration
+            'duration': total_distance / ROBOT_SPEED
         },
         "error": None
     })
