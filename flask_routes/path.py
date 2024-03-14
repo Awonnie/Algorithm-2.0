@@ -56,7 +56,7 @@ def path_finder():
     setup_img_folders()
     clear_images()
 
-    # path_results = get_extended_path(optimal_path)
+    path_results = get_extended_path(optimal_path)
     # print("Extended Path:")
     # for path in path_results:
     #     print(path)
@@ -74,7 +74,7 @@ def path_finder():
     return jsonify({
         "data": {
             'distance': total_distance,
-            'path': [],
+            'path': path_results,
             'commands': commands,
             'duration': total_distance / ROBOT_SPEED
         },
