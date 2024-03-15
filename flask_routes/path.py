@@ -30,9 +30,9 @@ def path_finder():
     robot_direction = int(content['robot_dir'])
 
     # DEBUGGING PRINT STATEMENTS
-    # print("Obstacles received:")
-    # for ob in obstacles:
-    #     print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
+    print("Obstacles received:")
+    for ob in obstacles:
+        print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
 
     # Initialize the Arena, Robot and Obstacles
     robot = Robot(robot_x, robot_y, robot_direction)

@@ -27,5 +27,5 @@ SCREENSHOT_COST = 50 # cost for the robot to take a photo when not directly in l
 '''
 Image Recognition Constants
 '''
-MODEL_ID = "mdp_grp27/3"
+MODEL_ID = "sc2079_videos/7"
 CV_API_KEY = os.getenv("CV_API_KEY")
