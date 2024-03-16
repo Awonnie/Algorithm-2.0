@@ -76,15 +76,15 @@ class Arena:
             bool: returns true or false
         """
         
-        if not self.is_valid_coord(x, y):
+        if not self.is_in_bounds(x, y):
             return False
 
         for ob in self.obstacles:
             if ob.x <= 4 and ob.y <= 4 and x < 4 and y < 4:
                 continue
-
+            
             # Must be at least 4 units away in total (x+y)
-            if abs(ob.x - x) + abs(ob.y - y) >= 4:
+            if abs(ob.x - x) + abs(ob.y - y) >= VIRTUAL_CELLS:
                 continue
 
             # If max(x,y) is less than 3 units away, consider not reachable
@@ -100,7 +100,7 @@ class Arena:
 
         return True
 
-    def is_valid_coord(self, x: int, y: int) -> bool:
+    def is_in_bounds(self, x: int, y: int) -> bool:
         """Checks if given position is within bounds
 
         Args:

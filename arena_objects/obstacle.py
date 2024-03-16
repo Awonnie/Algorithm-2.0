@@ -32,44 +32,51 @@ class Obstacle(GridCell):
             List[GridCell]: Valid cell states where robot can be positioned to view the symbol on the obstacle
         """
         cells = []
-        extra_cells = VIRTUAL_CELLS + 1 if retrying else VIRTUAL_CELLS
+        extra_cells = VIRTUAL_CELLS + 2 if retrying else VIRTUAL_CELLS + 1
         left_viewing_coord = (0,0)
         right_viewing_coord = (0,0)
         center_viewing_coord = (0,0)
+        close_center_viewing_coord = (0,0)
         robot_direction = Direction.NONE
 
 
         # If the image is facing NORTH, robot has to be facing SOUTH
-        if self.direction==Direction.NORTH:
+        if self.direction == Direction.NORTH:
             center_viewing_coord = (self.x, self.y + extra_cells)
+            close_center_viewing_coord = (self.x, self.y + extra_cells - 1)
             left_viewing_coord = (self.x + 1, self.y + extra_cells)
             right_viewing_coord = (self.x - 1, self.y + extra_cells)
             robot_direction = Direction.SOUTH
 
         # If the image is facing SOUTH, robot has to be facing NORTH
-        elif self.direction==Direction.SOUTH:
+        elif self.direction == Direction.SOUTH:
             center_viewing_coord = (self.x, self.y - extra_cells)
+            close_center_viewing_coord = (self.x, self.y - extra_cells + 1)
             left_viewing_coord = (self.x - 1, self.y - extra_cells)
             right_viewing_coord = (self.x + 1, self.y - extra_cells)
             robot_direction = Direction.NORTH
 
         # If the image is facing WEST, robot has to be facing EAST
-        elif self.direction==Direction.WEST:
+        elif self.direction == Direction.WEST:
             center_viewing_coord = (self.x - extra_cells, self.y)
+            close_center_viewing_coord = (self.x - extra_cells + 1, self.y)
             left_viewing_coord = (self.x - extra_cells, self.y + 1)
             right_viewing_coord = (self.x - extra_cells, self.y - 1)
             robot_direction = Direction.EAST
 
         # If the image is facing EAST, robot has to be facing WEST
-        elif self.direction== Direction.EAST:
+        elif self.direction == Direction.EAST:
             center_viewing_coord = (self.x + extra_cells, self.y)
+            close_center_viewing_coord = (self.x + extra_cells - 1, self.y)
             left_viewing_coord = (self.x + extra_cells, self.y - 1)
             right_viewing_coord = (self.x + extra_cells, self.y + 1)
             robot_direction = Direction.WEST
             
-        # Center Position 
+        # Center Positions
         if is_valid_position(center_viewing_coord[0], center_viewing_coord[1]):
             cells.append(GridCell(center_viewing_coord[0], center_viewing_coord[1], robot_direction, self.obstacle_id, 0))
+        if is_valid_position(close_center_viewing_coord[0], close_center_viewing_coord[1]):
+            cells.append(GridCell(close_center_viewing_coord[0], close_center_viewing_coord[1], robot_direction, self.obstacle_id, 0))
                 
         # Left Position
         if is_valid_position(left_viewing_coord[0], left_viewing_coord[1]):

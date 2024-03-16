@@ -12,12 +12,11 @@ def stitch_images():
 
     Return: a json object with a key "result" and value s"ok"
     """
-
     # Call Stitiching method here
-    img = stitch_image()
-    img.show()
-    img2 = stitch_image_own()
-    img2.show()
+    stitched_raw = stitch_raw_imgs()
+    stitched_annotated = stitch_annotated_imgs()
+    stitched_raw.show()
+    stitched_annotated.show()
 
     # Return okay response
     return jsonify({"result": "ok"})
