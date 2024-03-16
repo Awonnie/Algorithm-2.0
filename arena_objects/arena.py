@@ -80,8 +80,8 @@ class Arena:
             return False
 
         for ob in self.obstacles:
-            if ob.x <= 4 and ob.y <= 4 and x < 4 and y < 4:
-                continue
+            # if ob.x <= 4 and ob.y <= 4 and x < 4 and y < 4:
+            #     continue
             
             # Must be at least 4 units away in total (x+y)
             if abs(ob.x - x) + abs(ob.y - y) >= VIRTUAL_CELLS:

@@ -22,7 +22,7 @@ Algorithm Constants
 '''
 ITERATIONS = 2000
 SAFE_COST = 1000 # the cost for the turn in case there is a chance that the robot is touch some obstacle
-SCREENSHOT_COST = 50 # cost for the robot to take a photo when not directly in line with the image (i.e, camera is too far left/right)
+SCREENSHOT_COST = 0 # cost for the robot to take a photo when not directly in line with the image (i.e, camera is too far left/right)
 
 '''
 Image Recognition Constants
