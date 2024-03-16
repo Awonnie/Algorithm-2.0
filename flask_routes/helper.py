@@ -167,7 +167,7 @@ def get_extended_path(path):
                 intermediate_path = [
                     {'x':cur_step.x - 1, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
                     {'x':cur_step.x - 2, 'y':cur_step.y, 'd':Direction.EAST, 's':-1},
-                    {'x':cur_step.x - 2, 'y':cur_step.y - 1, 'd':Direction.SOUTH, 's':-1},
+                    {'x':cur_step.x - 2, 'y':cur_step.y + 1, 'd':Direction.SOUTH, 's':-1},
                     ]
         elif cur_step.direction == Direction.WEST and next_step.direction == Direction.SOUTH:
             #FL
