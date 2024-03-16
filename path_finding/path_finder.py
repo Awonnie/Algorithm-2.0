@@ -1,13 +1,13 @@
-import numpy as np
-from python_tsp.exact import solve_tsp_dynamic_programming
-
 import heapq
 import math
 from typing import List
 
-from direction import Direction
+import numpy as np
+from python_tsp.exact import solve_tsp_dynamic_programming
+
 from arena_objects import GridCell
-from consts import TURN_FACTOR, ITERATIONS, TURN_RADIUS, SAFE_COST
+from consts import ITERATIONS, SAFE_COST, TURN_FACTOR, TURN_RADIUS
+from direction import Direction
 
 movement_directions = [
     (1, 0, Direction.EAST),
@@ -206,6 +206,7 @@ class PathFinder:
 
         return 0
 
+      
     def __get_neighbors(self, x, y, orientation, strict=True):  # TODO: see the behavior of the robot and adjust...
         """
         Return a list of tuples with format:
@@ -236,7 +237,7 @@ class PathFinder:
 
             else:  # consider 8 cases
 
-                if not self.arena.is_reachable(x, y, preTurn=True):
+              if not self.arena.is_reachable(x, y, preTurn=True):
                     continue
                 
                 # Turning radius can be found in consts.py: set to (3,1)
