@@ -22,17 +22,11 @@ def path_finder():
     # Get the json data from the request
     content = request.json
 
-
     # Get the obstacles, big_turn, retrying, robot_x, robot_y, and robot_direction from the json data
     obstacles = content['obstacles']
     retrying = content['retrying']
     robot_x, robot_y = content['robot_x'], content['robot_y']
-    robot_direction = int(content['robot_dir'])
-
-    # DEBUGGING PRINT STATEMENTS
-    # print("Obstacles received:")
-    # for ob in obstacles:
-    #     print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
+    robot_direction = int(content['robot_dir'])   
 
     # Initialize the Arena, Robot and Obstacles
     robot = Robot(robot_x, robot_y, robot_direction)
@@ -48,7 +42,7 @@ def path_finder():
     search_start_time = time.perf_counter()
     optimal_path, total_distance = path_finder.get_shortest_path(retrying=retrying)
     search_end_time = time.perf_counter()
-    
+
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
 
@@ -57,19 +51,28 @@ def path_finder():
     clear_images()
 
     path_results = get_extended_path(optimal_path)
-    # print("Extended Path:")
-    # for path in path_results:
+    
+    # SHORTEST PATH SEARCH INFO
+    print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.3f}s")
+    print(f"Distance to travel: {total_distance} units")
+
+    # # OBSTACLES RECEIVED
+    # print("Obstacles received:")
+    # for ob in obstacles:
+    #     print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
+    
+    # # OPTIMAL PATH RECEIVED
+    # print("Optimal Path:")
+    # for path in optimal_path:
     #     print(path)
 
-    # DEBUGGING PRINT STATEMENTS
-    print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.4f}s")
-    print(f"Distance to travel: {total_distance} units")
-    print("Commands:")    
-    for command in commands:
-        if command.startswith("SNAP"):
-            print(command)
-        else:
-            print(command, end=" ")
+    # # COMMANDS RECEIVED
+    # print("Commands:")    
+    # for command in commands:
+    #     if command.startswith("SNAP"):
+    #         print(command)
+    #     else:
+    #         print(command, end=" ")
         
     return jsonify({
         "data": {
