@@ -237,7 +237,7 @@ class PathFinder:
 
             else:  # consider 8 cases
 
-              if not self.arena.is_reachable(x, y, preTurn=True):
+                if not self.arena.is_reachable(x, y, preTurn=True):
                     continue
                 
                 # Turning radius can be found in consts.py: set to (3,1)
