@@ -253,13 +253,13 @@ class PathFinder:
                         reverse_y = y - smaller_change
 
                         # Corresponding Command: FR00
-                        if self.arena.is_reachable(forward_x + 1, forward_y, turn = True):
+                        if self.arena.is_reachable(forward_x + 1, forward_y, turn = True) and self.arena.is_reachable(x, forward_y):
                             # Get safe cost of destination
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BL00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(x, reverse_y):
                             if self.arena.is_reachable(x, y+1):
                                 # Get safe cost of destination
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
@@ -277,12 +277,12 @@ class PathFinder:
                         reverse_y = y - smaller_change
 
                         # Corresponding Command: FL00
-                        if self.arena.is_reachable(forward_x - 1, forward_y, turn = True):
+                        if self.arena.is_reachable(forward_x - 1, forward_y, turn = True) and self.arena.is_reachable(x, forward_y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BR00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(x, reverse_y):
                             if self.arena.is_reachable(x, y + 1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -300,12 +300,12 @@ class PathFinder:
                         reverse_y = y - bigger_change
 
                         # Corresponding Command: FL00
-                        if self.arena.is_reachable(forward_x, forward_y + 1, turn = True):
+                        if self.arena.is_reachable(forward_x, forward_y + 1, turn = True) and self.arena.is_reachable(forward_x, y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BR00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(reverse_x, y):
                             if self.arena.is_reachable(x+1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -322,12 +322,12 @@ class PathFinder:
                         reverse_y = y + bigger_change
 
                         # Corresponding Command: FR00
-                        if self.arena.is_reachable(forward_x, forward_y - 1, turn = True):
+                        if self.arena.is_reachable(forward_x, forward_y - 1, turn = True) and self.arena.is_reachable(forward_x, y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BL00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(reverse_x, y):
                             if self.arena.is_reachable(x + 1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -345,12 +345,12 @@ class PathFinder:
                         reverse_y = y + smaller_change
 
                         # Corresponding Command: FL00
-                        if self.arena.is_reachable(forward_x + 1, forward_y, turn = True):
+                        if self.arena.is_reachable(forward_x + 1, forward_y, turn = True) and self.arena.is_reachable(x, forward_y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BR00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(x, reverse_y):
                             if self.arena.is_reachable( x , y - 1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -367,12 +367,12 @@ class PathFinder:
                         reverse_y = y + smaller_change
 
                         # Corresponding Command: FR00
-                        if self.arena.is_reachable(forward_x-1, forward_y, turn = True):
+                        if self.arena.is_reachable(forward_x-1, forward_y, turn = True) and self.arena.is_reachable(x, forward_y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BL00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(x, reverse_y):
                             if self.arena.is_reachable(x, y-1):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -389,12 +389,12 @@ class PathFinder:
                         reverse_y = y + bigger_change
 
                         # Corresponding Command: FL00
-                        if self.arena.is_reachable(forward_x, forward_y-1, turn = True):
+                        if self.arena.is_reachable(forward_x, forward_y-1, turn = True) and self.arena.is_reachable(forward_x, y):
                             safe_cost = self.__get_safe_cost(forward_x, forward_y)
                             neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                         # Corresponding Command: BR00
-                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                        if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(reverse_x, y):
                             if self.arena.is_reachable(x-1, y):
                                 safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                 neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
@@ -410,12 +410,12 @@ class PathFinder:
                             reverse_y = y - bigger_change
 
                             # Corresponding Command: FR00
-                            if self.arena.is_reachable(forward_x, forward_y+1, turn = True):
+                            if self.arena.is_reachable(forward_x, forward_y+1, turn = True) and self.arena.is_reachable(forward_x, y):
                                 safe_cost = self.__get_safe_cost(forward_x, forward_y)
                                 neighbors.append((forward_x, forward_y, new_orientation, safe_cost + 10))
 
                             # Corresponding Command: BL00
-                            if self.arena.is_reachable(reverse_x, reverse_y, turn = True):
+                            if self.arena.is_reachable(reverse_x, reverse_y, turn = True) and self.arena.is_reachable(reverse_x, y):
                                 if self.arena.is_reachable(x-1, y):
                                     safe_cost = self.__get_safe_cost(reverse_x, reverse_y)
                                     neighbors.append((reverse_x, reverse_y, new_orientation, safe_cost + 10))
