@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from .helper import clear_images, setup_img_folders, get_extended_path
 
+from .helper import clear_images, get_extended_path, setup_img_folders
 
 status = Blueprint('status', __name__)
 
@@ -12,4 +12,7 @@ def connection_check():
 
     Return: a json object with a key "result" and value s"ok"
     """
+
+    setup_img_folders()
+    clear_images()
     return jsonify({"result": "ok"})

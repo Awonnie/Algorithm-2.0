@@ -5,10 +5,10 @@ from flask import Blueprint, jsonify, request
 # Local Imports
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
-from path_finding import PathFinder, command_generator
-from .helper import get_extended_path
 from direction import Direction
-from .helper import setup_img_folders, clear_images
+from path_finding import PathFinder, command_generator
+
+from .helper import clear_images, get_extended_path, setup_img_folders
 
 path = Blueprint('path', __name__)
 
@@ -20,6 +20,12 @@ def path_finder():
 
     Return: a json object with a key "data" and value a dictionary with keys "distance", "path", and "commands"
     """
+    # Reference the global variable
+    global image_data_storage  
+
+    # Clear the global image_data_storage list
+    image_data_storage.clear()
+
     # Get the json data from the request
     content = request.json
 

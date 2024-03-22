@@ -1,12 +1,11 @@
 
+import os
+import random
+
 import cv2
 import supervision as sv
 from flask import Blueprint, jsonify, request
 from inference import get_roboflow_model
-
-import random
-import os
-
 
 # Local Imports
 from consts import CV_API_KEY, MODEL_ID
@@ -15,6 +14,9 @@ image = Blueprint('image', __name__)
 
 # Initialise model
 robomodel = get_roboflow_model(model_id= MODEL_ID, api_key=CV_API_KEY) 
+
+# Initialize the global storage for image_data
+image_data_storage = []
 
 @image.route('/image', methods=['POST'])
 def image_predict():
@@ -29,6 +31,8 @@ def image_predict():
     filename = file.filename
     raw_img_path = 'images/raw'
     annotated_img_path = 'images/annotated'
+
+    global image_data_storage  # Reference the global variable
 
     # Error Handling for file operations
     try:
@@ -58,9 +62,8 @@ def image_predict():
             "image_id": 23
         })
 
-
     image_data = detections.data.get('class_name')
-    image_data = [i for i in image_data if i != 'bullseye']
+    image_data = [i for i in image_data if i not in image_data_storage and i!= 'bullseye']
 
     # DEBUGGING PRINT STATEMENTS
     print("Detected image:", detections.data)
@@ -77,6 +80,9 @@ def image_predict():
     # Generate a unique filename for the annotated image
     rand = random.randint(1000, 9999)
     annotated_filename = f"{annotated_img_path}/annotated_image_{image_data}_{rand}.jpg"
+
+    # Update the global storage with the new image_data
+    image_data_storage.extend(image_data)  
     
     try:
         # Save the annotated image
