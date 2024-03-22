@@ -6,8 +6,9 @@ from flask import Blueprint, jsonify, request
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
 from path_finding import PathFinder, command_generator
-from .helper import clear_images, setup_img_folders, get_extended_path
+from .helper import get_extended_path
 from direction import Direction
+from .helper import setup_img_folders, clear_images
 
 path = Blueprint('path', __name__)
 
@@ -46,20 +47,16 @@ def path_finder():
     # Based on the shortest path, generate commands for the robot
     commands = command_generator(optimal_path, obstacles)
 
-    # Initialise folders to prepare for SNAP commands
-    setup_img_folders()
-    clear_images()
-
     path_results = get_extended_path(optimal_path)
     
     # SHORTEST PATH SEARCH INFO
-    print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.3f}s")
-    print(f"Distance to travel: {total_distance} units")
+    # print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.3f}s")
+    # print(f"Distance to travel: {total_distance} units")
 
     # OBSTACLES RECEIVED
-    print("Obstacles received:")
-    for ob in obstacles:
-        print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
+    # print("Obstacles received:")
+    # for ob in obstacles:
+    #     print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
     
     # # OPTIMAL PATH RECEIVED
     # print("Optimal Path:")
@@ -67,12 +64,16 @@ def path_finder():
     #     print(path)
 
     # COMMANDS RECEIVED
-    print("Commands:")    
-    for command in commands:
-        if command.startswith("SNAP"):
-            print(command)
-        else:
-            print(command, end=" ")
+    # print("Commands:")    
+    # for command in commands:
+    #     if command.startswith("SNAP"):
+    #         print(command)
+    #     else:
+    #         print(command, end=" ")
+
+    # Initialise folders to prepare for SNAP commands
+    setup_img_folders()
+    clear_images()
         
     return jsonify({
         "data": {

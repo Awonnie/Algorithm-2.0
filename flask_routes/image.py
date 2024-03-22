@@ -63,7 +63,8 @@ def image_predict():
     image_data = [i for i in image_data if i != 'bullseye']
 
     # DEBUGGING PRINT STATEMENTS
-    print("Detected image:", image_data)
+    print("Detected image:", detections.data)
+
 
     # Create supervision annotators
     bounding_box_annotator = sv.BoundingBoxAnnotator()

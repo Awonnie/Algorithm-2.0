@@ -77,10 +77,10 @@ def clear_images():
             file_path = os.path.join('images/annotated',filename)
             os.remove(file_path)
 
-    for filename in os.listdir('images/stitched'):
-        if filename.startswith("stitched"):
-            file_path = os.path.join('images/stitched',filename)
-            os.remove(file_path)
+    # for filename in os.listdir('images/stitched'):
+    #     if filename.startswith("stitched"):
+    #         file_path = os.path.join('images/stitched',filename)
+    #         os.remove(file_path)
 
 
 def setup_img_folders():
