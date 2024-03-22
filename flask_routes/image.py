@@ -58,12 +58,12 @@ def image_predict():
             "image_id": 23
         })
 
-    # DEBUGGING PRINT STATEMENTS
-    print("Detected image:", detections.data.get('class_name'))
 
-    image_data = detections.data.get('class_name')[0]
-    if image_data == "bullseye":
-        image_data = 10
+    image_data = detections.data.get('class_name')
+    image_data = [i for i in image_data if i != 'bullseye']
+
+    # DEBUGGING PRINT STATEMENTS
+    print("Detected image:", image_data)
 
     # Create supervision annotators
     bounding_box_annotator = sv.BoundingBoxAnnotator()
@@ -86,6 +86,6 @@ def image_predict():
         # Return the obstacle_id and image_id
         result = {
             "obstacle_id": obstacle_id,
-            "image_id": image_data
+            "image_id": image_data[0]
         }
     return jsonify(result)

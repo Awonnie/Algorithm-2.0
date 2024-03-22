@@ -56,23 +56,23 @@ def path_finder():
     print(f"Time taken to find shortest path using A* search: {search_end_time - search_start_time:0.3f}s")
     print(f"Distance to travel: {total_distance} units")
 
-    # # OBSTACLES RECEIVED
-    # print("Obstacles received:")
-    # for ob in obstacles:
-    #     print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
+    # OBSTACLES RECEIVED
+    print("Obstacles received:")
+    for ob in obstacles:
+        print(f"id {ob['id']}: {(ob['x'], ob['y'], Direction(ob['d']))}")
     
     # # OPTIMAL PATH RECEIVED
     # print("Optimal Path:")
     # for path in optimal_path:
     #     print(path)
 
-    # # COMMANDS RECEIVED
-    # print("Commands:")    
-    # for command in commands:
-    #     if command.startswith("SNAP"):
-    #         print(command)
-    #     else:
-    #         print(command, end=" ")
+    # COMMANDS RECEIVED
+    print("Commands:")    
+    for command in commands:
+        if command.startswith("SNAP"):
+            print(command)
+        else:
+            print(command, end=" ")
         
     return jsonify({
         "data": {
