@@ -5,10 +5,10 @@ from flask import Blueprint, jsonify, request
 # Local Imports
 from arena_objects import Arena, Obstacle, Robot
 from consts import ROBOT_SPEED
-from path_finding import PathFinder, command_generator
-from .helper import get_extended_path
 from direction import Direction
-from .helper import setup_img_folders, clear_images
+from path_finding import PathFinder, command_generator
+
+from .helper import clear_images, get_extended_path, setup_img_folders
 
 path = Blueprint('path', __name__)
 
